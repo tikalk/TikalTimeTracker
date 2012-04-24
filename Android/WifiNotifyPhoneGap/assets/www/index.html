@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>PhoneGap</title>
+<LINK REL=StyleSheet HREF="main.css" TYPE="text/css">
+<script type="text/javascript" charset="utf-8" src="cordova-1.5.0.js"></script>
+<script type="text/javascript" charset="utf-8" src="wifi_listener.js"></script>
+<script type="text/javascript" charset="utf-8">
+	var times = 0;
+
+	//add project for monitoring
+	
+	function addPoint () {
+		var form = document.getElementById('addPointForm');
+    	var project = form.project.value;
+    	var id = form.id.value;
+    	var longitude = form.longitude.value;
+    	var latitude = form.latitude.value;
+    	//alert (project + "," + id + "," + longitude + "," + latitude);
+    	window.plugins.WifiListener.set_point({	"projectname": project,
+    											"projectid":id, 
+    											"longitude":longitude,
+    											"latitude":latitude }, 
+    											successAdd, failedAdd);
+	}
+	function successAdd(){
+		alert("successfully added project");
+	}
+	function failedAdd(){
+		alert("failed to add project");
+	}
+	
+	//onload prints to cordova log if service is running or not
+	function onLoad() {
+		document.addEventListener("deviceready", onDeviceReady, true);
+	}
+	function onDeviceReady() {
+		window.plugins.WifiListener.service_running("", function(r) {
+			console.log("service running " + r)
+		}, function(e) {
+			console.log("start running check failure: " + e)
+		});
+	}
+	
+	//service functions
+	//device is ready run startup mechanisms
+	function startService() {
+		window.plugins.WifiListener.start("", function(r) {
+			console.log("start success " + r);
+			onDeviceReady();
+		}, function(e) {
+			console.log("start failure: " + e);
+			onDeviceReady();
+		});
+
+		//window.plugins.WifiListener.get_active("", function(r){successList(r)}   ,function(e){console.log(e)});
+	}
+	function stopService() {
+		window.plugins.WifiListener.stop("", function(r) {
+			console.log("stop success " + r);
+			onDeviceReady();
+		}, function(e) {
+			console.log("stop failure: " + e);
+			onDeviceReady();
+		});
+		//window.plugins.WifiListener.get_active("", function(r){successList(r)}   ,function(e){console.log(e)});
+	}
+	
+	
+	//timelog functions
+	function getLog() {
+		window.plugins.WifiListener.get_log("", function(r) {
+			successLog(r)
+		}, function(e) {
+			console.log(e)
+		});
+	}
+	function successLog(retVal) {
+		if (retVal == null || retVal == "")
+			alert("no log ");
+		else {
+			var logText = document.getElementById('log');
+			logText.innerHTML = "";
+			for (index in retVal) {
+				var newLogText = document.createElement('p');
+				newLogText.innerHTML = retVal[index];
+				logText.appendChild(newLogText);
+				logText.appendChild(document.createElement('BR'));
+				logText.appendChild(document.createElement('BR'));
+			}
+		}
+	}
+</script>
+</head>
+<body onload="onLoad();">
+	<h1>WifiNotify</h1>
+	<button id="startButton" onClick="startService()">Start
+		Service</button>
+	<button id="stopButton" onClick="stopService()">Stop Service</button>
+	<h3 class="explain">Start service will start the listening for
+		wifi points. Once started it will remain on until stop service button
+		is clicked (even after restarts).</h3>
+	<FORM id="addPointForm" NAME="addPointForm" ACTION="" METHOD="GET">
+		Project Name: <INPUT TYPE="text" NAME="project" VALUE="">
+		<P>
+			Project ID: <INPUT TYPE="text" NAME="id" VALUE="">
+		<P>
+			Longitude: <INPUT TYPE="text" NAME="longitude" VALUE="">
+		<P>
+			Latitude: <INPUT TYPE="text" NAME="latitude" VALUE="">
+		<P>
+			<INPUT TYPE="button" NAME="addButton" Value="add"
+				onClick="addPoint()">
+	</FORM>
+	<h3>use the above form to add projects for wifi monitoring, will
+		grab all local ssids when added</h3>
+	<div id="spots2">refreshed: 0</div>
+	<button onClick="getLog()">Print Log</button>
+	<div id="log"></div>
+</body>
+</html>

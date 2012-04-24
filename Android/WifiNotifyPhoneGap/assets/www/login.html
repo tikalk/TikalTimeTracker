@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Login</title>
+  <script type="text/javascript" charset="utf-8" src="cordova-1.5.0.js"></script>   
+  <script type="text/javascript" charset="utf-8" src="wifi_listener.js"></script> 
+  <script type="text/javascript" charset="utf-8">
+  var loggingIn = false;
+  var projectName = "";
+  var projectID = "";
+  	function onLoad(){
+		document.addEventListener("deviceready", onDeviceReady, true);
+	}
+	//device is ready run startup mechanisms
+	function onDeviceReady(){
+	//grab the data from the notification
+		window.plugins.WifiListener.get_notify_details("", function(r){success(r)}   ,function(e){console.log(e)});
+	}
+	//when recieve data from notification
+	function success(values){
+		loggingIn = values.login;
+		projectName = values.project_name;
+		projectID = values.project_id;
+		//set the button
+		var button = document.getElementById('loginButton');
+	 	if(button != undefined){
+	 		if(loggingIn)
+	 			button.innerHTML = "log into ";
+	 		else
+	 			button.innerHTML = "log out of ";
+	 		button.innerHTML += projectName + " with id " + projectID;
+	 	}
+	}
+	function log(){
+		if(loggingIn)
+			window.plugins.WifiListener.login({"project_id": projectID }, successLog, function(e){errorLog(e)});
+		else
+			window.plugins.WifiListener.logout({"project_id": projectID }, successLog, function(e){errorLog(e)});
+	}
+	function successLog(){
+		setTimeout( function() {navigator.app.exitApp();}, 100 );
+	}
+	function errorLog(error){
+		alert(error.message + error.stack);
+		setTimeout( function() {navigator.app.exitApp();}, 100 );
+	}
+  </script>       
+  
+  </head>
+  <body onload="onLoad();">
+    <button id="loginButton" onClick="log()">Login</button>
+	
+</body>
+</html>
