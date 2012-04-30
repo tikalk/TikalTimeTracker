@@ -70,21 +70,22 @@ WifiListener.prototype.get_active = function(data, successCallback, failureCallb
 			[data]);
 };
 
-/**
-* Get all projects
-* 
-* @param data				Currently no data is needed, may be utilized in future editions
-* @param successCallback	The success callback
-* @param failureCallback	The error callback 
-*/
-WifiListener.prototype.get_active = function(data, successCallback, failureCallback) {
-	return PhoneGap.exec(
-			successCallback,			 
-			failureCallback,						
-			'WifiListener',				
-			'get_active',								
-			[data]);
-};
+///**
+//* NOT IMPLEMENTED YET
+//* Get all projects
+//* 
+//* @param data				Currently no data is needed, may be utilized in future editions
+//* @param successCallback	The success callback
+//* @param failureCallback	The error callback 
+//*/
+//WifiListener.prototype.get_active = function(data, successCallback, failureCallback) {
+//	return PhoneGap.exec(
+//			successCallback,			 
+//			failureCallback,						
+//			'WifiListener',				
+//			'get_active',								
+//			[data]);
+//};
 
 /**
  * Get all current wifi spots

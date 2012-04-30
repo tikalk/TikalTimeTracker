@@ -82,13 +82,11 @@ public class WifiListener extends Plugin {
 				Intent stopServiceIntent = new Intent(context, WifiListenerService.class);
 				context.bindService(stopServiceIntent, new ServiceConnection() {
 					
-					@Override
 					public void onServiceDisconnected(ComponentName name) {
 						// TODO Auto-generated method stub
 						
 					}
 					
-					@Override
 					public void onServiceConnected(ComponentName name, IBinder service) {
 						WifiListenerService wifiService = ((WifiListenerService.LocalBinder)service).getService();
 						wifiService.unregisterRecievers();
