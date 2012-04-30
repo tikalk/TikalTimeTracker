@@ -1,0 +1,71 @@
+Put the .h and .m files of your plugin here. The .js files of your plugin belong in the www folder.
+
+MyProjects 
+
+Nav Bar
+1) Title - My Projects
+2) Right Button - Add Projects
+
+Top Half of Screen
+Will be displayed when checked in to a project
+1) Info on current checkin
+    Check in time / Time there
+    Check out button
+2) List of current projects
+    Click on a project will show a menu
+    1) Check in
+    2) Info - Show location on Project Detail View
+    3) Delete
+    2) Cancel
+    
+Add Project View
+Will query foursquare with current location
+1) List of nearby projects
+    Click on left half of item will push Project Detail View
+    Click on left half will add project to Current Projects
+    
+Project Detail View
+1) Google Map with Marker showing the location of the Project
+
+Check In Process
+When a user checks in the following will be saved
+New Event Object will be created
+
+Database Objects
+
+Project
+1) id - (FourSquare)
+2) name
+3) address
+4) latitude
+5) longitude
+6) currentlyHere - BOOL - Set when checking in
+
+Event
+1) projectid
+2) checkin timestamp
+3) checkout timestamp
+
+Location Monitoring Service - Android Only For Now
+WifiAP
+1) SSID
+2) ...
+3) projectid
+4) projectname
+5) latitude
+6) longitude
+
+WifiService
+This service will be launched to run in the background on Android
+When user manually checks in to a project the following will happen
+1) projectid and projectname will be sent to service.
+2) service will scan wifi and associate any APs found with this project (if not already associated)
+
+3) the service will run in the background scanning APs
+   if the user is currently not checked in
+   1) if 1 or more APs are found that are connected to a project then the service will send a notification to the user to check in
+   
+   if user is checked in
+   1) if NO APs from the current project are found a notification will be sent to ask the user to check out.
+   
+   
