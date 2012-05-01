@@ -51,7 +51,6 @@
 	}
 	*/
 	
-	
 	var root = this;
 	var fsclient
 	var currentLocation;
@@ -80,9 +79,6 @@
 
 	}
 	
-	
-        
-
 	/* When this function is called, PhoneGap has been initialized and is ready to roll */
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
@@ -93,12 +89,27 @@
 	}
         
 	function doSelectLocation(id) {
-		jQuery.each(nearbyLocations, function() {
-			if( id == this.id) {
-				currentLocation = this;
-				displayCurrentLocation(currentLocation);
-                doAddLocation();
-				return;
+		// Check if project already exists
+		var projects = Project.all(); // Returns QueryCollection of all Projects in Database
+		var projectsJSONString = "";
+		var boolProjectExists = false;
+		projects.list(null, function (results) {
+		    results.forEach(function (projectentityitem) {
+		        if(id == projectentityitem.fid) {
+					console.log("id exists");
+					$.mobile.changePage("#mainPage");
+					boolProjectExists = true;
+				}
+		    });
+			if(!boolProjectExists) {
+				jQuery.each(nearbyLocations, function() {
+					if( id == this.id) {
+						currentLocation = this;
+						displayCurrentLocation(currentLocation);
+	                	doAddLocation();
+						return;
+					}
+				});	
 			}
 		});
 	}
@@ -114,8 +125,9 @@
         persistence.add(project);
         persistence.flush(function() {
 		  console.log('Done flushing');
+		  $.mobile.changePage("#mainPage");
 		});
-        $.mobile.changePage("#mainPage");
+        
 	}
         
 	function showMapForLocation(id) {
@@ -207,16 +219,16 @@
 			<a onClick="retrieveLocations();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Add</a>
 			<span class="ui-title">My Projects</span>
 		</div>
-          <ul data-role="listview" data-theme="g" class="lstMyProjects">
+          <ul class="lstMyProjects" data-role="listview" data-split-icon="gear" data-split-theme="d">
 		  </ul>
 		  	
             <script id="projectItem" type="text/x-jquery-tmpl">
                 <li>
-                <a onclick="showMapForLocation('${id}');">
+                <a onclick="showMapForLocation('${fid}');">
                 <h3>${name}</h3>
                 <p>${address}</p>
                 </a>
-                <a onclick="doSelectLocation('${id}');">${name}</a>
+                <a onclick="doSelectLocation('${fid}');">${name}</a>
                 </li> 
             </script>
       </div>

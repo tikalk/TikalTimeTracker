@@ -9,19 +9,14 @@ $('#mainPage').live("pageshow", function() {
 		var projects = Project.all(); // Returns QueryCollection of all Projects in Database
 		var projectsJSONString = "";
 		projects.list(null, function (results) {
-				// 		    results.forEach(function (projectentityitem) {
-				// 		        console.log(projectentityitem.name)
-				// 		        projectentityitem.selectJSON(null, ['*'], function(jsonobj) {
-				// 	console.log(jsonobj);
-				// 	projectsJSONString = projectsJSONString + jsonstring;
-				// });
-				// 		    });
-				var list = $( "#mainPage" ).find( ".lstMyProjects" );
-				//Use template to create items & add to list
-				$( "#projectItem" ).tmpl( results ).appendTo( list );
-				//Call the listview jQuery UI Widget after adding 
-				//items to the list allowing correct rendering
-				list.listview( "refresh" );
+			var list = $( "#mainPage" ).find( ".lstMyProjects" );
+			//Empty current list
+	        list.empty();
+			//Use template to create items & add to list
+			$( "#projectItem" ).tmpl( results ).appendTo( list );
+			//Call the listview jQuery UI Widget after adding 
+			//items to the list allowing correct rendering
+			list.listview( "refresh" );
 		});
 	});                
 });
