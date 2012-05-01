@@ -225,16 +225,16 @@
               <span class="ui-title">Select Location</span>
           </div>
           <div data-role="content">
-              <ul class="locationlist" data-role="listview" data-split-icon="info" data-split-theme="d">
+              <ul class="locationlist" data-role="listview" data-split-icon="plus" data-split-theme="d">
                   
 			  </ul>
               	<script id="locationItem" type="text/x-jquery-tmpl">
                   <li>
-                  <a onclick="doSelectLocation('${id}');">
+                  <a onclick="showMapForLocation('${id}');">
                   <h3>${name}</h3>
                   <p>${location.address}</p>
                   </a>
-                  <a onclick="showMapForLocation('${id}');">${name}</a>
+                  <a onclick="doSelectLocation('${id}');">${name}</a>
                   </li> 
               	</script> 
           </div>
