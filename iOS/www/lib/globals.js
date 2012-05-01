@@ -1,6 +1,23 @@
 // JavaScript Document
-var fsqClientID = '1OYPMZW55HEI5CHOJ0AH4EGJATOF0TQD3Z03PRNAJZIKWTPM';
-var fsqRedirect = 'http://tikalk.com';
+// 
+// Global Variables
+var root = this;
+var fsclient
+var currentLocation;
+var currentLandL;
+var nearbyLocations;
+var fsAPI_KEY = "1OYPMZW55HEI5CHOJ0AH4EGJATOF0TQD3Z03PRNAJZIKWTPM";
+var fsAPI_SECRET = "HG4IHVAI4E01RFR135PLJ5TERNKYTDAGQWG0VUSRWEGIKLIG";
+
+// Persistence Models
+var Project = persistence.define('Project', {
+  fid: "TEXT",
+  name: "TEXT",
+  address: "TEXT",
+  latitude: "TEXT",
+  longitude: "TEXT",
+  currentlyHere: "BOOL"
+});
 
 $('#mainPage').live("pageshow", function() {
 	// Load Current Projects from WebSQL Database and refresh Listview
