@@ -19,7 +19,6 @@ import com.tikalk.tools.DBTool;
 import com.tikalk.tools.Defined;
 import com.tikalk.tools.PendingEvent;
 import com.tikalk.tools.Shared;
-import com.tikalk.wifinotify.WifiNotifyPhoneGapActivity;
 
 public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {	
 	/**
@@ -146,8 +145,8 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 
 		CharSequence contentTitle = title;
 		CharSequence contentText = loginString1 + projectName + loginString2;
-		//TODO need to somehow make this dynamic so that will load the main activity
-		Intent notificationIntent = new Intent(context, WifiNotifyPhoneGapActivity.class);
+		Intent notificationIntent = new Intent();
+		notificationIntent.setClassName(Defined.INTENT_PACKAGE, Defined.INTENT_ACTIVITY);
 		notificationIntent.putExtra(KEY_CALLER, "notification");
 		notificationIntent.putExtra(Defined.KEY_PROJECT_NAME, projectName);
 		notificationIntent.putExtra(Defined.KEY_LOGGING_IN, loggingIn);
