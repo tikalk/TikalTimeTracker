@@ -25,6 +25,9 @@
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 	<script type="text/javascript" src="lib/ui/min/jquery.ui.map.full.min.js"></script>
 	<script type="text/javascript" src="lib/ui/min/jquery.ui.map.services.min.js"></script>
+	<script type="text/javascript" src="lib/persistencejs/persistence.js"></script>
+	<script type="text/javascript" src="lib/persistencejs/persistence.store.sql.js"></script>
+	<script type="text/javascript" src="lib/persistencejs/persistence.store.websql.js"></script>
 	
 	<script type="text/javascript">
 
@@ -48,22 +51,7 @@
 	}
 	*/
 	
-	/* When this function is called, Cordova has been initialized and is ready to roll */
-	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
-	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
-	for more details -jm */
-	function onBodyLoad() { document.addEventListener("deviceready", onDeviceReady, false); }
-
-	/* When this function is called, PhoneGap has been initialized and is ready to roll */
-	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
-	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
-	for more details -jm */
-	function onDeviceReady()
-	{
-		// do your thing!
-		fsclient = new FourSquareClient(fsAPI_KEY, fsAPI_SECRET, "", true);
-	}
-        
+	
 	var root = this;
 	var fsclient
 	var currentLocation;
@@ -71,23 +59,79 @@
 	var nearbyLocations;
 	var fsAPI_KEY = "1OYPMZW55HEI5CHOJ0AH4EGJATOF0TQD3Z03PRNAJZIKWTPM";
 	var fsAPI_SECRET = "HG4IHVAI4E01RFR135PLJ5TERNKYTDAGQWG0VUSRWEGIKLIG";
+    
+	// Persistence Models
+	var Project = persistence.define('Project', {
+	  fid: "TEXT",
+	  name: "TEXT",
+	  address: "TEXT",
+	  latitude: "TEXT",
+	  longitude: "TEXT",
+	  currentlyHere: "BOOL"
+	});
+	
+	/* When this function is called, Cordova has been initialized and is ready to roll */
+	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
+	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
+	for more details -jm */
+	function onBodyLoad() { 
+		document.addEventListener("deviceready", onDeviceReady, false); 
+		// do your thing!
+		persistence.store.websql.config(persistence, 'tikaltimetracker', 'Tikal Time Tracker DB', 5 * 1024 * 1024);
+		persistence.schemaSync(function(tx) { 
+		    var projects = Project.all();
+			projects.list(null, function (results) {
+			    results.forEach(function (r) {
+			        console.log(r.name)
+			        window.task = r;
+			    });
+			});
+		});
+	}
+	
+	
+        
+
+	/* When this function is called, PhoneGap has been initialized and is ready to roll */
+	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
+	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
+	for more details -jm */
+	function onDeviceReady()
+	{
+		fsclient = new FourSquareClient(fsAPI_KEY, fsAPI_SECRET, "", true);
+	}
         
 	function doSelectLocation(id) {
 		jQuery.each(nearbyLocations, function() {
 			if( id == this.id) {
 				currentLocation = this;
-				$.mobile.changePage("#mainPage", { transition: "slide"});
 				displayCurrentLocation(currentLocation);
+                doAddLocation();
 				return;
 			}
 		});
+	}
+	
+	function doAddLocation() {
+		var project = new Project();
+		project.fid = currentLocation.id;
+		project.name = currentLocation.name;
+		project.address = currentLocation.location.address;
+		project.latitude = currentLocation.location.lat;
+		project.longitude = currentLocation.location.lng;
+		project.currentlyHere = false;
+        persistence.add(project);
+        persistence.flush(function() {
+		  console.log('Done flushing');
+		});
+        $.mobile.changePage("#mainPage");
 	}
         
 	function showMapForLocation(id) {
 		jQuery.each(nearbyLocations, function() {
 			if( id == this.id) {
 				currentLocation = this;
-				$.mobile.changePage("#map_page", { transition: "slide"});
+				$.mobile.changePage("#map_page");
 				return;
 			}
 		});
@@ -103,12 +147,22 @@
 		$.mobile.showPageLoadingMsg();
 		navigator.geolocation.getCurrentPosition(onSuccess, onError);
 	}
+	
+	function clearNearbyLocations() {
+		var list = $( "#selectlocation" ).find( ".locationlist" );
+        //Empty current list
+        list.empty();
+		//Call the listview jQuery UI Widget after adding 
+		//items to the list allowing correct rendering
+		list.listview( "refresh" );
+	}
         
 	// onSuccess Callback
 	//   This method accepts a `Position` object, which contains
 	//   the current GPS coordinates
 	//
 	var onSuccess = function(position) {
+        
 		currentLandL = position.coords.latitude+","+position.coords.longitude;
 		var parameters = {
 			ll: currentLandL, 
@@ -119,11 +173,10 @@
 			onSuccess: function(data) {
 				nearbyLocations = data.response.venues;
 				//alert(nearbyLocations);
-				$.mobile.changePage("#selectlocation", { transition: "slide"});
+				$.mobile.changePage("#selectlocation");
+				clearNearbyLocations();
 				$.mobile.hidePageLoadingMsg();														
-				var list = $( "#selectlocation" ).find( ".locationlist" );
-				//Empty current list
-				list.empty();
+                var list = $( "#selectlocation" ).find( ".locationlist" );
 				//Use template to create items & add to list
 				$( "#locationItem" ).tmpl( nearbyLocations ).appendTo( list );
 				//Call the listview jQuery UI Widget after adding 
@@ -157,52 +210,49 @@
 
   </head>
   <body onload="onBodyLoad()">
+	
       <div data-add-back-btn="true" data-role="page" id="mainPage">
-          <div data-role="header">
-              <h2>Tikal Time Tracker</h2>
-          </div>
-          <div data-role="content">
-              <ul data-role="listview">
-                  <li><a onClick="retrieveLocations();">Select Location</a></li>
-              </ul>
-              <p id="locationContainer"></p>
-          </div>
-          <div data-role="button" onClick="doCheckIn();">
-              <h1>Check In</h1>
-          </div>
+		<div data-role="header" data-position="fixed" data-theme="b"> 
+			<a onClick="retrieveLocations();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Add</a>
+			<span class="ui-title">My Projects</span>
+		</div>
+          <ul data-role="listview" data-theme="g" id="lstMyProjects">
+		</ul>
       </div>
+
       <div data-add-back-btn="true" data-role="page" id="selectlocation">
-          <div data-role="header" >
-              <h2>Select Location</h2>
+          <div data-role="header" data-position="fixed" data-theme="b">
+              <span class="ui-title">Select Location</span>
           </div>
           <div data-role="content">
               <ul class="locationlist" data-role="listview" data-split-icon="info" data-split-theme="d">
-              </ul>
-              <script id="locationItem" type="text/x-jquery-tmpl">
+                  
+			  </ul>
+              	<script id="locationItem" type="text/x-jquery-tmpl">
                   <li>
                   <a onclick="doSelectLocation('${id}');">
                   <h3>${name}</h3>
                   <p>${location.address}</p>
                   </a>
-                  <a onclick="showMapForLocation('${id}');" data-rel="dialog" data-transition="slideup">${name}</a>
+                  <a onclick="showMapForLocation('${id}');">${name}</a>
                   </li> 
-                  </script> 
-          </div>
-          <div data-role="footer">
-              <h4>Page Footer</h4>
+              	</script> 
           </div>
       </div>
+
       <div data-role="page" data-theme="b" id="map_page" class="page-map" data-add-back-btn="true" style="width:100%; height:100%;"> 
           <script type="text/javascript">
               
               </script>
-          <div data-role="header">
-              <h1>View On Map</h1>
+          <div data-role="header" data-position="fixed" data-theme="b">
+              <a onClick="doAddLocation();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Save</a>
+              <span class="ui-title">View On Map</span>
           </div>
           <div data-role="content" style="width:100%; height:100%; padding:0;">
               <div id="map_canvas" style="width:100%; height:100%;"></div>
           </div>
       </div>
+
   </body>
 </html>
 </strong>

@@ -6,12 +6,7 @@ var fsqRedirect = 'http://tikalk.com';
 $('#map_page').live("pageshow", function() {
 	$('#map_canvas').gmap(
 		{ 'center' : new google.maps.LatLng(currentLocation.location.lat, currentLocation.location.lng), 
-		  'zoom' : 15, 
-		  'mapTypeControl' : true, 
-		  'navigationControl' : true,
-		  'scaleControl' : true,
-		  'zoomControl' : true,
-		  'streetViewControl' : false 
+		  'mapTypeControl' : true
 		}
 	);
                     
