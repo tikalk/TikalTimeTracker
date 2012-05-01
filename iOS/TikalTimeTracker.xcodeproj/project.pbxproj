@@ -546,6 +546,7 @@
 				95CE8523153C798400FBCFB2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

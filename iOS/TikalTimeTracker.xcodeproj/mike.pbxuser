@@ -1,0 +1,89 @@
+// !$*UTF8*$!
+{
+	27EE358E154FE71700868C1D /* TikalTimeTracker */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = TikalTimeTracker;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	27EE3631154FE73200868C1D /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+	};
+	27EE3632154FE73200868C1D /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	95CE84BC153C798300FBCFB2 /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeExecutable = 27EE358E154FE71700868C1D /* TikalTimeTracker */;
+		activeSDKPreference = iphoneos4.3;
+		activeTarget = 95CE84C7153C798300FBCFB2 /* TikalTimeTracker */;
+		codeSenseManager = 27EE3632154FE73200868C1D /* Code sense */;
+		executables = (
+			27EE358E154FE71700868C1D /* TikalTimeTracker */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					833,
+					20,
+					48.16259765625,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 357558039;
+			PBXWorkspaceStateSaveDate = 357558039;
+		};
+		sourceControlManager = 27EE3631154FE73200868C1D /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	95CE84C7153C798300FBCFB2 /* TikalTimeTracker */ = {
+		activeExec = 0;
+		executables = (
+			27EE358E154FE71700868C1D /* TikalTimeTracker */,
+		);
+	};
+}
