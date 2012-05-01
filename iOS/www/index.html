@@ -77,16 +77,7 @@
 	function onBodyLoad() { 
 		document.addEventListener("deviceready", onDeviceReady, false); 
 		// do your thing!
-		persistence.store.websql.config(persistence, 'tikaltimetracker', 'Tikal Time Tracker DB', 5 * 1024 * 1024);
-		persistence.schemaSync(function(tx) { 
-		    var projects = Project.all();
-			projects.list(null, function (results) {
-			    results.forEach(function (r) {
-			        console.log(r.name)
-			        window.task = r;
-			    });
-			});
-		});
+
 	}
 	
 	
@@ -216,8 +207,18 @@
 			<a onClick="retrieveLocations();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Add</a>
 			<span class="ui-title">My Projects</span>
 		</div>
-          <ul data-role="listview" data-theme="g" id="lstMyProjects">
-		</ul>
+          <ul data-role="listview" data-theme="g" class="lstMyProjects">
+		  </ul>
+		  	
+            <script id="projectItem" type="text/x-jquery-tmpl">
+                <li>
+                <a onclick="showMapForLocation('${id}');">
+                <h3>${name}</h3>
+                <p>${address}</p>
+                </a>
+                <a onclick="doSelectLocation('${id}');">${name}</a>
+                </li> 
+            </script>
       </div>
 
       <div data-add-back-btn="true" data-role="page" id="selectlocation">

@@ -2,6 +2,29 @@
 var fsqClientID = '1OYPMZW55HEI5CHOJ0AH4EGJATOF0TQD3Z03PRNAJZIKWTPM';
 var fsqRedirect = 'http://tikalk.com';
 
+$('#mainPage').live("pageshow", function() {
+	// Load Current Projects from WebSQL Database and refresh Listview
+    persistence.store.websql.config(persistence, 'tikaltimetracker', 'Tikal Time Tracker DB', 5 * 1024 * 1024);
+	persistence.schemaSync(function(tx) { 
+		var projects = Project.all(); // Returns QueryCollection of all Projects in Database
+		var projectsJSONString = "";
+		projects.list(null, function (results) {
+				// 		    results.forEach(function (projectentityitem) {
+				// 		        console.log(projectentityitem.name)
+				// 		        projectentityitem.selectJSON(null, ['*'], function(jsonobj) {
+				// 	console.log(jsonobj);
+				// 	projectsJSONString = projectsJSONString + jsonstring;
+				// });
+				// 		    });
+				var list = $( "#mainPage" ).find( ".lstMyProjects" );
+				//Use template to create items & add to list
+				$( "#projectItem" ).tmpl( results ).appendTo( list );
+				//Call the listview jQuery UI Widget after adding 
+				//items to the list allowing correct rendering
+				list.listview( "refresh" );
+		});
+	});                
+});
 						
 $('#map_page').live("pageshow", function() {
 	$('#map_canvas').gmap(
