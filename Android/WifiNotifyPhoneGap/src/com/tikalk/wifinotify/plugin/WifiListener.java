@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.util.Log;
 import android.webkit.WebSettings.PluginState;
@@ -47,10 +48,18 @@ public class WifiListener extends Plugin {
 	public static final String ACTION_LOGIN = "login";
 	//confirm to logout of a place
 	public static final String ACTION_LOGOUT = "logout";
-	//user requests the details for the notificaiton click
+	//requests the details for the notificaiton click
 	public static final String ACTION_GET_NOTIFY_DETAILS = "get_notify_details";
-	//user requests the formatted log for logins and logouts
+	//requests the formatted log for logins and logouts
 	public static final String ACTION_GET_LOG = "get_log";
+	//request for current wifi state
+	public static final String ACTION_GET_WIFI_STATE = "get_wifi_state";
+	//request to change wifi state
+	public static final String ACTION_SET_WIFI_STATE = "set_wifi_state";
+	//request project notification state
+	public static final String ACTION_GET_NOTIFICATION_STATE = "get_project_notify_state";
+	//set project notification state
+	public static final String ACTION_SET_NOTIFICATION_STATE = "SET_project_notify_state";
 
 
 
@@ -77,21 +86,21 @@ public class WifiListener extends Plugin {
 		}
 		else if(action.matches(ACTION_STOP)){
 			if(WifiListenerService.isServiceRunning(ctx.getApplicationContext())){
-				
+
 				//stop service
 				Intent stopServiceIntent = new Intent(context, WifiListenerService.class);
 				context.bindService(stopServiceIntent, new ServiceConnection() {
-					
+
 					public void onServiceDisconnected(ComponentName name) {
 						// TODO Auto-generated method stub
-						
+
 					}
-					
+
 					public void onServiceConnected(ComponentName name, IBinder service) {
 						WifiListenerService wifiService = ((WifiListenerService.LocalBinder)service).getService();
 						wifiService.unregisterRecievers();
 						wifiService.stopSelf();
-						
+
 					}
 				}, Context.BIND_NOT_FOREGROUND);
 				//boolean serviceStoppedBool = context.stopService(stopServiceIntent);
@@ -153,7 +162,7 @@ public class WifiListener extends Plugin {
 				id = data.getJSONObject(0).getString("projectid");
 				latitude =  data.getJSONObject(0).getString("latitude");
 				longitude =  data.getJSONObject(0).getString("longitude");
-				
+
 			}catch (JSONException e) {
 				Log.d(TAG, "error setting new point:" + e.getMessage());
 				return new PluginResult(Status.ERROR, getJsonObjectError(e));
@@ -206,6 +215,22 @@ public class WifiListener extends Plugin {
 			db.close();
 			return new PluginResult(Status.OK, retVal);
 		}
+		else if(action.matches(ACTION_GET_WIFI_STATE)){
+			WifiManager wMNG = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
+			return new PluginResult(Status.OK, wMNG.isWifiEnabled());
+		}
+		else if(action.matches(ACTION_SET_WIFI_STATE)){
+			
+		}
+		else if(action.matches(ACTION_GET_NOTIFICATION_STATE)){
+
+		}
+		else if(action.matches(ACTION_SET_NOTIFICATION_STATE)){
+
+		}
+
+
+
 		if(result == null)
 			result = new PluginResult(Status.ERROR, getJsonObjectError(new JSONException("no value")));
 		db.close();

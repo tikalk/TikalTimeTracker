@@ -90,7 +90,7 @@ WifiListener.prototype.get_active = function(data, successCallback, failureCallb
 /**
  * Get all current wifi spots
  * 
- * @param data				the ssid, longitude, and latitude for the point
+ * @param data				"projectid" - id passed by 4[], "logitude", "latitude", "projectname" - name passed by 4[]
  * @param successCallback	The success callback
  * @param failureCallback	The error callback 
  */
@@ -123,7 +123,7 @@ WifiListener.prototype.get_notify_details = function(data, successCallback, fail
 /**
  * logs in to the given spot
  * 
- * @param data				ssid for given spot
+ * @param data				"project_id" - id passed by 4[]
  * @param successCallback	The success callback
  * @param failureCallback	The error callback
  */
@@ -139,7 +139,7 @@ WifiListener.prototype.login = function(data, successCallback, failureCallback) 
 /**
  * logs out of the given spot
  * 
- * @param data				ssid for given spot
+ * @param data				"project_id" - id passed by 4[]
  * @param successCallback	The success callback
  * @param failureCallback	The error callback
  */
@@ -167,6 +167,71 @@ WifiListener.prototype.get_log = function(data, successCallback, failureCallback
 			'get_log',								
 			[data]);
 };
+
+/**
+ * returns boolean of what wifi state is
+ * 
+ * @param data				Currently no data is needed, may be utilized in future editions
+ * @param successCallback	The success callback (returns boolean: if true wifi is on if false wifi is off)
+ * @param failureCallback	The error callback
+ */
+WifiListener.prototype.get_wifi_state = function(data, successCallback, failureCallback) {
+	return PhoneGap.exec(
+			successCallback,			 
+			failureCallback,						
+			'WifiListener',				
+			'get_wifi_state',								
+			[data]);
+};
+
+/**
+ * sets current wifi state to the given boolean
+ * 
+ * @param data				"state" - true (turn on wifi), false (turn off wifi)
+ * @param successCallback	The success callback (returns boolean: if true wifi is on if false wifi is off)
+ * @param failureCallback	The error callback
+ */
+WifiListener.prototype.set_wifi_state = function(data, successCallback, failureCallback) {
+	return PhoneGap.exec(
+			successCallback,			 
+			failureCallback,						
+			'WifiListener',				
+			'set_wifi_state',								
+			[data]);
+};
+
+/**
+ * returns boolean if project is enabled for notifications
+ * 
+ * @param data				"project_id" - will return this projects notification state
+ * @param successCallback	The success callback (returns boolean: if true notifications are enabled for this project)
+ * @param failureCallback	The error callback
+ */
+WifiListener.prototype.get_project_notify_state = function(data, successCallback, failureCallback) {
+	return PhoneGap.exec(
+			successCallback,			 
+			failureCallback,						
+			'WifiListener',				
+			'get_project_notify_state',								
+			[data]);
+};
+
+/**
+ * sets the project notify state for a given 
+ * 
+ * @param data				"project_id" - will return this projects notification state
+ * @param successCallback	The success callback (returns boolean: if true notifications are enabled for this project)
+ * @param failureCallback	The error callback
+ */
+WifiListener.prototype.set_project_notify_state = function(data, successCallback, failureCallback) {
+	return PhoneGap.exec(
+			successCallback,			 
+			failureCallback,						
+			'WifiListener',				
+			'set_project_notify_state',								
+			[data]);
+};
+
 
 PhoneGap.addConstructor(function() {
 	PhoneGap.addPlugin("WifiListener", new WifiListener());

@@ -65,7 +65,14 @@
 		});
 		//window.plugins.WifiListener.get_active("", function(r){successList(r)}   ,function(e){console.log(e)});
 	}
-	
+	function getWifyState(){
+		window.plugins.WifiListener.get_wifi_state("", function(r) {
+			var wifistate = document.getElementById('wifi_state');
+			wifistate.innerHTML = "wifi state is " + r;
+		}, function(e) {
+			console.log(e)
+		});
+	}
 	
 	//timelog functions
 	function getLog() {
@@ -116,6 +123,8 @@
 		grab all local ssids when added</h3>
 	<div id="spots2">refreshed: 0</div>
 	<button onClick="getLog()">Print Log</button>
+	<BR />
+	<button onClick="getWifyState()">Get Wifi State</button><div id="wifi_state"></div>
 	<div id="log"></div>
 </body>
 </html>
