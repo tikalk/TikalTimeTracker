@@ -142,6 +142,31 @@
 			});
 		});
 	}
+	
+	function toggleCheckin() {
+		$.mobile.showPageLoadingMsg();
+		Project.findBy("fid", $.mobile.pageData.fid, function(project) {
+			console.log(project);
+			var here = project.currentlyHere;
+			if(here) {
+			    //MIKE TODO - send check out update
+			} else {
+			   // send check in update
+			}
+			project.currentlyHere = !here
+			persistence.flush(function() {
+			  	console.log('Done flushing');
+			  	$.mobile.changePage("#mainPage");	
+				$.mobile.hidePageLoadingMsg();
+			});
+		});
+	}
+	
+	function toggleNotify() {
+		var mytoggle = $( "#notifyState" );
+		var shouldNotify = mytoggle[0].selectedIndex == 1 ? true:false;
+		//MIKE TODO - Toggle Notify;
+	}
         
 	// onSuccess Callback
 	//   This method accepts a `Position` object, which contains
@@ -196,7 +221,7 @@
 
   </head>
   <body onload="onBodyLoad()">
-	
+
       <div data-add-back-btn="true" data-role="page" id="mainPage">
 		<div data-role="header" data-position="fixed" data-theme="b"> 
 			<a onClick="retrieveLocations();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Add</a>
@@ -204,7 +229,7 @@
 		</div>
           <ul class="lstMyProjects" data-role="listview" data-split-icon="gear" data-split-theme="d">
 		  </ul>
-		  	
+
             <script id="projectItem" type="text/x-jquery-tmpl">
                 <li>
                 <a onclick="showMapForLocation('${fid}');">
@@ -221,24 +246,24 @@
 			<span class="ui-title"></span>
 		</div>
 		<div data-role="content">
-            <a data-role="button" data-transition="fade" data-theme="a" data-icon="check" data-iconpos="left">
+            <a id="btnCheckin" data-role="button" data-transition="fade" data-theme="a" data-icon="check" data-iconpos="left" onclick="toggleCheckin();">
                 Check In
             </a>
-			<div data-role="fieldcontain">
-                <fieldset data-role="controlgroup">
-                    <label for="notifyState">
-                        Notifications
-                    </label>
-                    <select name="notifyState" id="notifyState" data-theme="b" data-role="slider">
-                        <option value="off">
-                            Off
-                        </option>
-                        <option value="on">
-                            On
-                        </option>
-                    </select>
-                </fieldset>
-            </div>
+            <div data-role="fieldcontain">
+                    <fieldset data-role="controlgroup">
+                        <label for="notifyState">
+                            Notifications
+                        </label>
+                        <select name="notifyState" id="notifyState" data-theme="b" data-role="slider" onchange="toggleNotify();">
+                            <option value="off">
+                                Off
+                            </option>
+                            <option value="on">
+                                On
+                            </option>
+                        </select>
+                    </fieldset>
+                </div>
             <a onclick="deleteProject();" data-role="button" data-transition="fade" data-theme="e" data-icon="delete" data-iconpos="left">
                 Delete
             </a>
@@ -247,12 +272,12 @@
 
       <div data-add-back-btn="true" data-role="page" id="selectlocation">
           <div data-role="header" data-position="fixed" data-theme="b">
-			  <a onClick="retrieveLocations();" data-icon="refresh" data-iconpos="right" class="ui-btn-right" data-theme="c">Refresh</a>
+			<a onClick="retrieveLocations();" data-icon="refresh" data-iconpos="right" class="ui-btn-right" data-theme="c">Refresh</a>
               <span class="ui-title">Select Location</span>
           </div>
           <div data-role="content">
               <ul class="locationlist" data-role="listview" data-split-icon="plus" data-split-theme="d">
-                  
+
 			  </ul>
               	<script id="locationItem" type="text/x-jquery-tmpl">
                   <li>
@@ -268,7 +293,7 @@
 
       <div data-role="page" data-theme="b" id="map_page" class="page-map" data-add-back-btn="true" style="width:100%; height:100%;"> 
           <script type="text/javascript">
-              
+
               </script>
           <div data-role="header" data-position="fixed" data-theme="b">
               <a onClick="doAddLocation();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Save</a>

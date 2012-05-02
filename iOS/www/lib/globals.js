@@ -41,10 +41,23 @@ $('#mainPage').live("pageshow", function() {
 });
 
 $('#projectOptions').live("pageshow", function() {
+    $.mobile.showPageLoadingMsg();
 	$( "#projectOptions" ).find( ".ui-title" ).html("Loading Project...");
 	
 	Project.findBy("fid", $.mobile.pageData.fid, function(project) {
 		$( "#projectOptions" ).find( ".ui-title" ).html(project.name);
+		
+		//MIKE TODO - Add Check for notifications here. I hardcoded true for now...
+		var shouldnotify = true;
+		$( "#notifyState" ).val((shouldnotify) ? "on" : "off").change();
+		
+        var here = project.currentlyHere;
+        if(here) {
+            $("#btnCheckin .ui-btn-text").text("Check Out");
+        } else {
+            $("#btnCheckin .ui-btn-text").text("Check In");
+        }
+        $.mobile.hidePageLoadingMsg();
 	});               
 });
 						
