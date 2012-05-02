@@ -21,6 +21,7 @@ var Project = persistence.define('Project', {
 
 $('#mainPage').live("pageshow", function() {
 	// Load Current Projects from WebSQL Database and refresh Listview
+	console.log("main page show");
     persistence.store.websql.config(persistence, 'tikaltimetracker', 'Tikal Time Tracker DB', 5 * 1024 * 1024);
 	persistence.schemaSync(function(tx) { 
 		var projects = Project.all(); // Returns QueryCollection of all Projects in Database
@@ -34,8 +35,17 @@ $('#mainPage').live("pageshow", function() {
 			//Call the listview jQuery UI Widget after adding 
 			//items to the list allowing correct rendering
 			list.listview( "refresh" );
+			console.log("refresh project listview");
 		});
 	});                
+});
+
+$('#projectOptions').live("pageshow", function() {
+	$( "#projectOptions" ).find( ".ui-title" ).html("Loading Project...");
+	
+	Project.findBy("fid", $.mobile.pageData.fid, function(project) {
+		$( "#projectOptions" ).find( ".ui-title" ).html(project.name);
+	});               
 });
 						
 $('#map_page').live("pageshow", function() {
