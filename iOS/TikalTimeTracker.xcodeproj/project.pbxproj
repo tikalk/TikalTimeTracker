@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9520B76A1552FC5C0051FD0F /* Geofencing.m in Sources */ = {isa = PBXBuildFile; fileRef = 9520B7691552FC5C0051FD0F /* Geofencing.m */; };
 		95CE84CD153C798300FBCFB2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CE84CC153C798300FBCFB2 /* Foundation.framework */; };
 		95CE84CF153C798300FBCFB2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CE84CE153C798300FBCFB2 /* UIKit.framework */; };
 		95CE84D1153C798300FBCFB2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CE84D0153C798300FBCFB2 /* CoreGraphics.framework */; };
@@ -42,6 +43,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9520B7681552FC5C0051FD0F /* Geofencing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Geofencing.h; path = Plugins/Geofencing.h; sourceTree = "<group>"; };
+		9520B7691552FC5C0051FD0F /* Geofencing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Geofencing.m; path = Plugins/Geofencing.m; sourceTree = "<group>"; };
 		95CE84C8153C798300FBCFB2 /* TikalTimeTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TikalTimeTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		95CE84CC153C798300FBCFB2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		95CE84CE153C798300FBCFB2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -258,6 +261,8 @@
 			isa = PBXGroup;
 			children = (
 				95CE851C153C798400FBCFB2 /* README */,
+				9520B7681552FC5C0051FD0F /* Geofencing.h */,
+				9520B7691552FC5C0051FD0F /* Geofencing.m */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
@@ -362,6 +367,7 @@
 				95CE84ED153C798300FBCFB2 /* main.m in Sources */,
 				95CE8515153C798400FBCFB2 /* AppDelegate.m in Sources */,
 				95CE8518153C798400FBCFB2 /* MainViewController.m in Sources */,
+				9520B76A1552FC5C0051FD0F /* Geofencing.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

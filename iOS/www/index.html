@@ -29,6 +29,7 @@
 	<script type="text/javascript" src="lib/persistencejs/persistence.store.sql.js"></script>
 	<script type="text/javascript" src="lib/persistencejs/persistence.store.websql.js"></script>
 	<script type="text/javascript" charset="utf-8" src="lib/globals.js"></script>
+	<script type="text/javascript" charset="utf-8" src="lib/Geofencing.js"></script>
 	
 	<script type="text/javascript">
 	/* When this function is called, Cordova has been initialized and is ready to roll */
@@ -146,12 +147,25 @@
 	function toggleCheckin() {
 		$.mobile.showPageLoadingMsg();
 		Project.findBy("fid", $.mobile.pageData.fid, function(project) {
-			console.log(project);
+			//console.log(project);
 			var here = project.currentlyHere;
 			if(here) {
 			    //MIKE TODO - send check out update
+
+				
 			} else {
 			   // send check in update
+				var params = {"fid": project.fid, "projectname": project.name, "latitude": project.latitude, "longitude": project.longitude};
+				console.log(params);
+				Geofencing.addRegion(
+					params,
+					function(result) {
+			           alert("Success : \r\n"+result);      
+			      	},
+			      	function(error) {
+			           alert("Error : \r\n"+error);      
+			      	}
+				);
 			}
 			project.currentlyHere = !here
 			persistence.flush(function() {
