@@ -15,5 +15,16 @@ var Geofencing = {
 	*/
      addRegion: function(params, success, fail) {
           return PhoneGap.exec(success, fail, "Geofencing", "addRegion", [params]);
+     },
+
+     /*
+	Params:
+	#define KEY_REGION_ID       @"fid"
+	#define KEY_PROJECT_NAME    @"projectname"
+	#define KEY_PROJECT_LAT     @"latitude"
+	#define KEY_PROJECT_LNG     @"longitude"
+	*/
+     removeRegion: function(params, success, fail) {
+          return PhoneGap.exec(success, fail, "Geofencing", "removeRegion", [params]);
      }
 };

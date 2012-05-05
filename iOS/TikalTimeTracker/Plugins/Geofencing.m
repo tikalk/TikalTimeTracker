@@ -91,63 +91,6 @@
 	}
 }
 
-#pragma mark Plugin Functions
-- (void)addRegion:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
-    
-    NSUInteger argc = [arguments count];
-    NSString* callbackId = (argc > 0)? [arguments objectAtIndex:0] : @"INVALID";
-    
-    if (![self isLocationServicesEnabled])
-	{
-		BOOL forcePrompt = NO;
-		if (!forcePrompt)
-		{
-            [self returnLocationError:PERMISSIONDENIED withMessage: nil];
-			return;
-		}
-    }
-    
-    if (![self isAuthorized]) 
-    {
-        NSString* message = nil;
-        BOOL authStatusAvailable = [CLLocationManager respondsToSelector:@selector(authorizationStatus)]; // iOS 4.2+
-        if (authStatusAvailable) {
-            NSUInteger code = [CLLocationManager authorizationStatus];
-            if (code == kCLAuthorizationStatusNotDetermined) {
-                // could return POSITION_UNAVAILABLE but need to coordinate with other platforms
-                message = @"User undecided on application's use of location services";
-            } else if (code == kCLAuthorizationStatusRestricted) {
-                message = @"application use of location services is restricted";
-            }
-        }
-        //PERMISSIONDENIED is only PositionError that makes sense when authorization denied
-        [self returnLocationError:PERMISSIONDENIED withMessage: message];
-        
-        return;
-    }  
-    
-    [self saveGeofenceCallbackId:callbackId];
-    
-    // Parse Incoming Params
-    NSString *regionId = [options objectForKey:KEY_REGION_ID];
-    NSString *latitude = [options objectForKey:KEY_PROJECT_LAT];
-    NSString *longitude = [options objectForKey:KEY_PROJECT_LNG];
-//    if (latitude.length > 9) {
-//        latitude = [latitude substringToIndex:8];
-//    }
-//    if (longitude.length > 9) {
-//        longitude = [longitude substringToIndex:8];
-//    }
-    //NSString *projectName = [options objectForKey:KEY_PROJECT_NAME];
-    
-    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake([latitude doubleValue], [longitude doubleValue]);
-    CLRegion *region = [[CLRegion alloc] initCircularRegionWithCenter:coord radius:10.0 identifier:regionId];
-    [self.locationManager startMonitoringForRegion:region desiredAccuracy:kCLLocationAccuracyBestForNavigation];
-    [region release];
-    
-    [self returnRegionSuccess];
-}
-
 - (void) saveGeofenceCallbackId:(NSString *) callbackId {
     if (!self.locationData) {
         self.locationData = [[[DGLocationData alloc] init] autorelease];
@@ -179,6 +122,108 @@
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:posError];
     NSString *callbackId = [self.locationData.locationCallbacks pop];
     [super writeJavascript:[result toErrorCallbackString:callbackId]];
+}
+
+#pragma mark Plugin Functions
+
+- (void)addRegion:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
+    
+    NSUInteger argc = [arguments count];
+    NSString* callbackId = (argc > 0)? [arguments objectAtIndex:0] : @"INVALID";
+    
+    [self saveGeofenceCallbackId:callbackId];
+    
+    if (![self isLocationServicesEnabled])
+	{
+		BOOL forcePrompt = NO;
+		if (!forcePrompt)
+		{
+            [self returnLocationError:PERMISSIONDENIED withMessage: nil];
+			return;
+		}
+    }
+    
+    if (![self isAuthorized]) 
+    {
+        NSString* message = nil;
+        BOOL authStatusAvailable = [CLLocationManager respondsToSelector:@selector(authorizationStatus)]; // iOS 4.2+
+        if (authStatusAvailable) {
+            NSUInteger code = [CLLocationManager authorizationStatus];
+            if (code == kCLAuthorizationStatusNotDetermined) {
+                // could return POSITION_UNAVAILABLE but need to coordinate with other platforms
+                message = @"User undecided on application's use of location services";
+            } else if (code == kCLAuthorizationStatusRestricted) {
+                message = @"application use of location services is restricted";
+            }
+        }
+        //PERMISSIONDENIED is only PositionError that makes sense when authorization denied
+        [self returnLocationError:PERMISSIONDENIED withMessage: message];
+        
+        return;
+    }  
+    
+    // Parse Incoming Params
+    NSString *regionId = [options objectForKey:KEY_REGION_ID];
+    NSString *latitude = [options objectForKey:KEY_PROJECT_LAT];
+    NSString *longitude = [options objectForKey:KEY_PROJECT_LNG];
+    //NSString *projectName = [options objectForKey:KEY_PROJECT_NAME];
+    
+    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake([latitude doubleValue], [longitude doubleValue]);
+    CLRegion *region = [[CLRegion alloc] initCircularRegionWithCenter:coord radius:10.0 identifier:regionId];
+    [self.locationManager startMonitoringForRegion:region desiredAccuracy:kCLLocationAccuracyBestForNavigation];
+    [region release];
+    
+    [self returnRegionSuccess];
+}
+
+- (void)removeRegion:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
+    
+    NSUInteger argc = [arguments count];
+    NSString* callbackId = (argc > 0)? [arguments objectAtIndex:0] : @"INVALID";
+    
+    [self saveGeofenceCallbackId:callbackId];
+    
+    if (![self isLocationServicesEnabled])
+	{
+		BOOL forcePrompt = NO;
+		if (!forcePrompt)
+		{
+            [self returnLocationError:PERMISSIONDENIED withMessage: nil];
+			return;
+		}
+    }
+    
+    if (![self isAuthorized]) 
+    {
+        NSString* message = nil;
+        BOOL authStatusAvailable = [CLLocationManager respondsToSelector:@selector(authorizationStatus)]; // iOS 4.2+
+        if (authStatusAvailable) {
+            NSUInteger code = [CLLocationManager authorizationStatus];
+            if (code == kCLAuthorizationStatusNotDetermined) {
+                // could return POSITION_UNAVAILABLE but need to coordinate with other platforms
+                message = @"User undecided on application's use of location services";
+            } else if (code == kCLAuthorizationStatusRestricted) {
+                message = @"application use of location services is restricted";
+            }
+        }
+        //PERMISSIONDENIED is only PositionError that makes sense when authorization denied
+        [self returnLocationError:PERMISSIONDENIED withMessage: message];
+        
+        return;
+    }  
+    
+    // Parse Incoming Params
+    NSString *regionId = [options objectForKey:KEY_REGION_ID];
+    NSString *latitude = [options objectForKey:KEY_PROJECT_LAT];
+    NSString *longitude = [options objectForKey:KEY_PROJECT_LNG];
+    //NSString *projectName = [options objectForKey:KEY_PROJECT_NAME];
+    
+    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake([latitude doubleValue], [longitude doubleValue]);
+    CLRegion *region = [[CLRegion alloc] initCircularRegionWithCenter:coord radius:10.0 identifier:regionId];
+    [self.locationManager stopMonitoringForRegion:region];
+    [region release];
+    
+    [self returnRegionSuccess];
 }
 
 #pragma mark Core Location Delegates

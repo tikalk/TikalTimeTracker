@@ -8,12 +8,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TikalTimeTracker/Plugins/Geofencing.m"
-         timestampString = "357817913.730509"
+         timestampString = "357827405.964167"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "167"
-         endingLineNumber = "167"
-         landmarkName = "-returnRegionSuccess"
+         startingLineNumber = "216"
+         endingLineNumber = "216"
+         landmarkName = "-removeRegion:withDict:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -21,12 +21,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TikalTimeTracker/Plugins/Geofencing.m"
-         timestampString = "357817915.075066"
+         timestampString = "357827536.905561"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "177"
-         endingLineNumber = "177"
-         landmarkName = "-returnLocationError:withMessage:"
+         startingLineNumber = "168"
+         endingLineNumber = "168"
+         landmarkName = "-addRegion:withDict:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

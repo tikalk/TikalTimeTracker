@@ -46,5 +46,6 @@ typedef NSUInteger DGLocationStatus;
 
 #pragma mark Plugin Functions
 - (void)addRegion:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
+- (void)removeRegion:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 
 @end

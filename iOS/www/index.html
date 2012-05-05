@@ -151,8 +151,17 @@
 			var here = project.currentlyHere;
 			if(here) {
 			    //MIKE TODO - send check out update
-
-				
+				var params = {"fid": project.fid, "projectname": project.name, "latitude": project.latitude, "longitude": project.longitude};
+				console.log(params);
+				Geofencing.removeRegion(
+					params,
+					function(result) {
+			           alert("Success : \r\n"+result);      
+			      	},
+			      	function(error) {
+			           alert("Error : \r\n"+error);      
+			      	}
+				);
 			} else {
 			   // send check in update
 				var params = {"fid": project.fid, "projectname": project.name, "latitude": project.latitude, "longitude": project.longitude};
