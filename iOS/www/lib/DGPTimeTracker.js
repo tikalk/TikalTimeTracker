@@ -2,7 +2,7 @@
  * DGPTimeTracker.js
  *  
  * Phonegap Geofencing plugin
- * Copyright (c) Dov Goldber 2012
+ * Copyright (c) Dov Goldberg 2012
  *
  */
 var DGPTimeTracker = {
