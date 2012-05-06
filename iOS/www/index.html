@@ -156,10 +156,10 @@
 				Geofencing.removeRegion(
 					params,
 					function(result) {
-			           alert("Success : \r\n"+result);      
+			           console.log("Success : \r\n"+result);      
 			      	},
 			      	function(error) {
-			           alert("Error : \r\n"+error);      
+			           console.log("Error : \r\n"+error);      
 			      	}
 				);
 			} else {
@@ -169,10 +169,10 @@
 				Geofencing.addRegion(
 					params,
 					function(result) {
-			           alert("Success : \r\n"+result);      
+			           console.log("Success : \r\n"+result);      
 			      	},
 			      	function(error) {
-			           alert("Error : \r\n"+error);      
+			           console.log("Error : \r\n"+error);      
 			      	}
 				);
 			}

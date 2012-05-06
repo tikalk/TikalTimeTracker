@@ -19,7 +19,9 @@
 enum DGLocationStatus {
     PERMISSIONDENIED = 1,
     POSITIONUNAVAILABLE,
-    TIMEOUT
+    TIMEOUT,
+    REGIONMONITORINGPERMISSIONDENIED,
+    REGIONMONITORINGUNAVAILABLE
 };
 typedef NSUInteger DGLocationStatus;
 
@@ -39,6 +41,8 @@ typedef NSUInteger DGLocationStatus;
 
 - (BOOL) isLocationServicesEnabled;
 - (BOOL) isAuthorized;
+- (BOOL) isRegionMonitoringAvailable;
+- (BOOL) isregionMonitoringEnabled;
 - (void) saveGeofenceCallbackId:(NSString *) callbackId;
 
 - (void) returnLocationError: (NSUInteger) errorCode withMessage: (NSString*) message;

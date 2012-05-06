@@ -59,6 +59,32 @@
 	[super dealloc];
 }
 
+- (BOOL) isRegionMonitoringAvailable
+{
+	BOOL regionMonitoringAvailableClassPropertyAvailable = [CLLocationManager respondsToSelector:@selector(regionMonitoringAvailable)]; 
+    if (regionMonitoringAvailableClassPropertyAvailable)
+    {
+        BOOL regionMonitoringAvailable = [CLLocationManager regionMonitoringAvailable];
+        return  (regionMonitoringAvailable);
+    }
+    
+    // by default, assume NO
+    return NO;
+}
+
+- (BOOL) isregionMonitoringEnabled
+{
+	BOOL regionMonitoringEnabledClassPropertyAvailable = [CLLocationManager respondsToSelector:@selector(regionMonitoringEnabled)]; 
+    if (regionMonitoringEnabledClassPropertyAvailable)
+    {
+        BOOL regionMonitoringEnabled = [CLLocationManager regionMonitoringEnabled];
+        return  (regionMonitoringEnabled);
+    }
+    
+    // by default, assume NO
+    return NO;
+}
+
 - (BOOL) isAuthorized
 {
 	BOOL authorizationStatusClassPropertyAvailable = [CLLocationManager respondsToSelector:@selector(authorizationStatus)]; // iOS 4.2+
@@ -102,7 +128,7 @@
     }
     
     // add the callbackId into the array so we can call back when get data
-    [lData.locationCallbacks addObject:callbackId];
+    [lData.locationCallbacks enqueue:callbackId];
 }
 
 - (void) returnRegionSuccess; {
@@ -110,8 +136,10 @@
     [posError setObject: [NSNumber numberWithInt: CDVCommandStatus_OK] forKey:@"code"];
     [posError setObject: @"Region Success" forKey: @"message"];
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:posError];
-    NSString *callbackId = [self.locationData.locationCallbacks pop];
-    [super writeJavascript:[result toSuccessCallbackString:callbackId]];
+    NSString *callbackId = [self.locationData.locationCallbacks dequeue];
+    if (callbackId) {
+        [super writeJavascript:[result toSuccessCallbackString:callbackId]];
+    }
 }
 
 - (void)returnLocationError: (NSUInteger) errorCode withMessage: (NSString*) message
@@ -120,8 +148,10 @@
     [posError setObject: [NSNumber numberWithInt: errorCode] forKey:@"code"];
     [posError setObject: message ? message : @"" forKey: @"message"];
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:posError];
-    NSString *callbackId = [self.locationData.locationCallbacks pop];
-    [super writeJavascript:[result toErrorCallbackString:callbackId]];
+    NSString *callbackId = [self.locationData.locationCallbacks dequeue];
+    if (callbackId) {
+        [super writeJavascript:[result toErrorCallbackString:callbackId]];
+    }
 }
 
 #pragma mark Plugin Functions
@@ -160,7 +190,19 @@
         [self returnLocationError:PERMISSIONDENIED withMessage: message];
         
         return;
-    }  
+    } 
+    
+    if (![self isRegionMonitoringAvailable])
+	{
+		[self returnLocationError:REGIONMONITORINGUNAVAILABLE withMessage: @"Region monitoring is unavailable"];
+        return;
+    }
+    
+    if (![self isregionMonitoringEnabled])
+	{
+		[self returnLocationError:REGIONMONITORINGPERMISSIONDENIED withMessage: @"User has restricted the use of region monitoring"];
+        return;
+    }
     
     // Parse Incoming Params
     NSString *regionId = [options objectForKey:KEY_REGION_ID];
@@ -212,6 +254,18 @@
         return;
     }  
     
+    if (![self isRegionMonitoringAvailable])
+	{
+		[self returnLocationError:REGIONMONITORINGUNAVAILABLE withMessage: @"Region monitoring is unavailable"];
+        return;
+    }
+    
+    if (![self isregionMonitoringEnabled])
+	{
+		[self returnLocationError:REGIONMONITORINGPERMISSIONDENIED withMessage: @"User has restricted the use of region monitoring"];
+        return;
+    }
+    
     // Parse Incoming Params
     NSString *regionId = [options objectForKey:KEY_REGION_ID];
     NSString *latitude = [options objectForKey:KEY_PROJECT_LAT];
@@ -233,8 +287,10 @@
     [posError setObject: [NSNumber numberWithInt: error.code] forKey:@"code"];
     [posError setObject: region.identifier forKey: @"regionid"];
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:posError];
-    NSString *callbackId = [self.locationData.locationCallbacks pop];
-    [super writeJavascript:[result toErrorCallbackString:callbackId]];
+    NSString *callbackId = [self.locationData.locationCallbacks dequeue];
+    if (callbackId) {
+        [super writeJavascript:[result toErrorCallbackString:callbackId]];
+    }
 }
 
 //- (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region {
