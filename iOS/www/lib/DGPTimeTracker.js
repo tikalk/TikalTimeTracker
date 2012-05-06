@@ -48,5 +48,21 @@ var DGPTimeTracker = {
 	*/
      getShouldAutoUpdateProjectEvents: function(params, success, fail) {
           return PhoneGap.exec(success, fail, "DGPTimeTracker", "getShouldAutoUpdateProjectEvents", [params]);
+     },
+
+	/*
+	Params:
+	#define KEY_REGION_ID       				@"fid"
+	*/
+     checkinToProject: function(params, success, fail) {
+          return PhoneGap.exec(success, fail, "DGPTimeTracker", "checkinToProject", [params]);
+     },
+	
+	/*
+	Params:
+	#define KEY_REGION_ID       				@"fid"
+	*/
+     checkoutOfProject: function(params, success, fail) {
+          return PhoneGap.exec(success, fail, "DGPTimeTracker", "checkoutOfProject", [params]);
      }
 };

@@ -23,9 +23,13 @@ typedef NSUInteger DGPTimeTrackerStatusCode;
 - (void)removeProject:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 - (void)setShouldAutoUpdateProjectEvents:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 - (void)getShouldAutoUpdateProjectEvents:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
+- (void)checkinToProject:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
+- (void)checkoutOfProject:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 
 - (void)returnTimeTrackerError: (NSUInteger) errorCode withMessage: (NSString*) message;
+-(void) doCheckIn:(NSString *)fid;
+-(void) doCheckOut:(NSString *)fid;
 // CoreData Functions
--(NSManagedObjectContext *) managedObjectContext;
+- (NSManagedObjectContext *) managedObjectContext;
 
 @end

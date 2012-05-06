@@ -219,7 +219,6 @@
     NSString* callbackId = (argc > 0)? [arguments objectAtIndex:0] : @"INVALID";
     
     [self saveGeofenceCallbackId:callbackId];
-    [self saveGeofenceCallbackId:callbackId];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
@@ -247,6 +246,100 @@
     [super writeJavascript:[result toSuccessCallbackString:callbackId]];
 }
 
+
+- (void)checkinToProject:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
+    NSUInteger argc = [arguments count];
+    NSString* callbackId = (argc > 0)? [arguments objectAtIndex:0] : @"INVALID";
+    
+    [self saveGeofenceCallbackId:callbackId];
+    
+    [self doCheckIn:[options objectForKey:KEY_REGION_ID]];
+    
+    NSMutableDictionary* posError = [NSMutableDictionary dictionaryWithCapacity:2];
+    [posError setObject: [NSNumber numberWithInt: CDVCommandStatus_OK] forKey:@"code"];
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:posError];
+    [super writeJavascript:[result toSuccessCallbackString:callbackId]];
+}
+
+- (void)checkoutOfProject:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
+    NSUInteger argc = [arguments count];
+    NSString* callbackId = (argc > 0)? [arguments objectAtIndex:0] : @"INVALID";
+    
+    [self saveGeofenceCallbackId:callbackId];
+    
+    [self doCheckOut:[options objectForKey:KEY_REGION_ID]];
+    
+    NSMutableDictionary* posError = [NSMutableDictionary dictionaryWithCapacity:2];
+    [posError setObject: [NSNumber numberWithInt: CDVCommandStatus_OK] forKey:@"code"];
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:posError];
+    [super writeJavascript:[result toSuccessCallbackString:callbackId]];
+}
+
+-(void) doCheckIn:(NSString *)fid {    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"fid=%@", fid];
+	[fetchRequest  setPredicate:predicate];
+	
+    NSError *dberror;
+    NSArray *items = [self.managedObjectContext executeFetchRequest:fetchRequest error:&dberror];
+    [fetchRequest release];
+	
+    if (items.count == 0) {
+        [self returnTimeTrackerError:PROJECTNOTFOUND withMessage: @"Project was not found"];
+        return;
+    }
+    
+    Project *project = [items objectAtIndex:0];
+    
+    // Create New Event Item
+    Event *event = [[Event alloc] initWithEntity:[NSEntityDescription entityForName:@"Event" inManagedObjectContext:self.managedObjectContext]  insertIntoManagedObjectContext:self.managedObjectContext];
+    event.checkin = [NSDate date];
+    event.checkout = nil;
+    [project addEventObject:event];
+    
+    NSError *dberror1;
+    if (![self.managedObjectContext save:&dberror1]) {
+        NSLog(@"Error deleting - error:%@",dberror1);
+    }
+}
+
+-(void) doCheckOut:(NSString *)fid {
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"fid=%@", fid];
+	[fetchRequest  setPredicate:predicate];
+	
+    NSError *dberror;
+    NSArray *items = [self.managedObjectContext executeFetchRequest:fetchRequest error:&dberror];
+    [fetchRequest release];
+	
+    if (items.count == 0) {
+        [self returnTimeTrackerError:PROJECTNOTFOUND withMessage: @"Project was not found"];
+        return;
+    }
+    
+    Project *project = [items objectAtIndex:0];
+    
+    // Create New Event Item
+    NSSet *events = project.event;
+    
+    for (Event *event in events.allObjects) {
+        if (event.checkout == nil) {
+            event.checkout = [NSDate date];
+        }
+    }
+    
+    NSError *dberror1;
+    if (![self.managedObjectContext save:&dberror1]) {
+        NSLog(@"Error deleting - error:%@",dberror1);
+    }
+}
+
 - (void)returnTimeTrackerError: (NSUInteger) errorCode withMessage: (NSString*) message
 {
     NSMutableDictionary* posError = [NSMutableDictionary dictionaryWithCapacity:2];
@@ -262,6 +355,60 @@
 -(NSManagedObjectContext *) managedObjectContext {
     id ad = [super appDelegate];
     return ((AppDelegate *)ad).managedObjectContext;
+}
+
+- (void) locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region
+{
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    NSString *fid = region.identifier;
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"fid=%@", fid];
+	[fetchRequest  setPredicate:predicate];
+	
+    NSError *dberror;
+    NSArray *items = [self.managedObjectContext executeFetchRequest:fetchRequest error:&dberror];
+    [fetchRequest release];
+	
+    if (items.count == 0) {
+        [self returnTimeTrackerError:PROJECTNOTFOUND withMessage: @"Project was not found"];
+        return;
+    }
+    
+    Project *project = [items objectAtIndex:0];
+    [super writeJavascript:[NSString stringWithFormat:@"alert('Entered: %@')", project.name]];
+    if (project.shouldAutoUpdate) {
+        [self doCheckIn:project.fid];
+    }    
+}
+
+- (void) locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region
+{
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    NSString *fid = region.identifier;
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"fid=%@", fid];
+	[fetchRequest  setPredicate:predicate];
+	
+    NSError *dberror;
+    NSArray *items = [self.managedObjectContext executeFetchRequest:fetchRequest error:&dberror];
+    [fetchRequest release];
+	
+    if (items.count == 0) {
+        [self returnTimeTrackerError:PROJECTNOTFOUND withMessage: @"Project was not found"];
+        return;
+    }
+    
+    Project *project = [items objectAtIndex:0];
+    [super writeJavascript:[NSString stringWithFormat:@"alert('Left: %@')", project.name]];
+    if (project.shouldAutoUpdate) {
+        [self doCheckOut:project.fid];
+    } 
 }
 
 @end
