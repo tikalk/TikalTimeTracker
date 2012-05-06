@@ -16,6 +16,10 @@
 #import "CDVPlugin.h"
 #endif
 
+#define KEY_REGION_ID       @"fid"
+#define KEY_PROJECT_LAT     @"latitude"
+#define KEY_PROJECT_LNG     @"longitude"
+
 enum DGLocationStatus {
     PERMISSIONDENIED = 1,
     POSITIONUNAVAILABLE,
@@ -42,8 +46,10 @@ typedef NSUInteger DGLocationStatus;
 - (BOOL) isLocationServicesEnabled;
 - (BOOL) isAuthorized;
 - (BOOL) isRegionMonitoringAvailable;
-- (BOOL) isregionMonitoringEnabled;
+- (BOOL) isRegionMonitoringEnabled;
 - (void) saveGeofenceCallbackId:(NSString *) callbackId;
+- (void) addRegion:(NSMutableDictionary *)params;
+- (void) removeRegion:(NSMutableDictionary *)params;
 
 - (void) returnLocationError: (NSUInteger) errorCode withMessage: (NSString*) message;
 - (void) returnRegionSuccess;

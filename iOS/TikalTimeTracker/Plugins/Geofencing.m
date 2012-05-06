@@ -8,11 +8,6 @@
 
 #import "Geofencing.h"
 
-#define KEY_REGION_ID       @"fid"
-#define KEY_PROJECT_NAME    @"projectname"
-#define KEY_PROJECT_LAT     @"latitude"
-#define KEY_PROJECT_LNG     @"longitude"
-
 @implementation DGLocationData
 
 @synthesize locationStatus, locationInfo, locationCallbacks;
@@ -72,7 +67,7 @@
     return NO;
 }
 
-- (BOOL) isregionMonitoringEnabled
+- (BOOL) isRegionMonitoringEnabled
 {
 	BOOL regionMonitoringEnabledClassPropertyAvailable = [CLLocationManager respondsToSelector:@selector(regionMonitoringEnabled)]; 
     if (regionMonitoringEnabledClassPropertyAvailable)
@@ -198,24 +193,40 @@
         return;
     }
     
-    if (![self isregionMonitoringEnabled])
+    if (![self isRegionMonitoringEnabled])
 	{
 		[self returnLocationError:REGIONMONITORINGPERMISSIONDENIED withMessage: @"User has restricted the use of region monitoring"];
         return;
     }
     
+    [self addRegion:options];
+    
+    [self returnRegionSuccess];
+}
+
+- (void) addRegion:(NSMutableDictionary *)params {
     // Parse Incoming Params
-    NSString *regionId = [options objectForKey:KEY_REGION_ID];
-    NSString *latitude = [options objectForKey:KEY_PROJECT_LAT];
-    NSString *longitude = [options objectForKey:KEY_PROJECT_LNG];
-    //NSString *projectName = [options objectForKey:KEY_PROJECT_NAME];
+    NSString *regionId = [params objectForKey:KEY_REGION_ID];
+    NSString *latitude = [params objectForKey:KEY_PROJECT_LAT];
+    NSString *longitude = [params objectForKey:KEY_PROJECT_LNG];
     
     CLLocationCoordinate2D coord = CLLocationCoordinate2DMake([latitude doubleValue], [longitude doubleValue]);
     CLRegion *region = [[CLRegion alloc] initCircularRegionWithCenter:coord radius:10.0 identifier:regionId];
     [self.locationManager startMonitoringForRegion:region desiredAccuracy:kCLLocationAccuracyBestForNavigation];
     [region release];
+}
+
+- (void) removeRegion:(NSMutableDictionary *)params {
+    // Parse Incoming Params
+    NSString *regionId = [params objectForKey:KEY_REGION_ID];
+    NSString *latitude = [params objectForKey:KEY_PROJECT_LAT];
+    NSString *longitude = [params objectForKey:KEY_PROJECT_LNG];
+    //NSString *projectName = [options objectForKey:KEY_PROJECT_NAME];
     
-    [self returnRegionSuccess];
+    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake([latitude doubleValue], [longitude doubleValue]);
+    CLRegion *region = [[CLRegion alloc] initCircularRegionWithCenter:coord radius:10.0 identifier:regionId];
+    [self.locationManager stopMonitoringForRegion:region];
+    [region release];
 }
 
 - (void)removeRegion:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
@@ -260,22 +271,13 @@
         return;
     }
     
-    if (![self isregionMonitoringEnabled])
+    if (![self isRegionMonitoringEnabled])
 	{
 		[self returnLocationError:REGIONMONITORINGPERMISSIONDENIED withMessage: @"User has restricted the use of region monitoring"];
         return;
     }
     
-    // Parse Incoming Params
-    NSString *regionId = [options objectForKey:KEY_REGION_ID];
-    NSString *latitude = [options objectForKey:KEY_PROJECT_LAT];
-    NSString *longitude = [options objectForKey:KEY_PROJECT_LNG];
-    //NSString *projectName = [options objectForKey:KEY_PROJECT_NAME];
-    
-    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake([latitude doubleValue], [longitude doubleValue]);
-    CLRegion *region = [[CLRegion alloc] initCircularRegionWithCenter:coord radius:10.0 identifier:regionId];
-    [self.locationManager stopMonitoringForRegion:region];
-    [region release];
+    [self removeRegion:options];
     
     [self returnRegionSuccess];
 }
@@ -293,14 +295,19 @@
     }
 }
 
-//- (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region {
-//    NSMutableDictionary* posError = [NSMutableDictionary dictionaryWithCapacity:2];
-//    [posError setObject: [NSNumber numberWithInt: CDVCommandStatus_OK] forKey:@"code"];
-//    [posError setObject: region.identifier forKey: @"regionid"];
-//    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:posError];
-//    NSString *callbackId = [self.locationData.locationCallbacks pop];
-//    [super writeJavascript:[result toSuccessCallbackString:callbackId]];
-//}
+- (void) locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region
+{
+    [super writeJavascript:[NSString stringWithFormat:@"alert('Entered: %@')", region.identifier]];
+}
 
+- (void) locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region
+{
+    [super writeJavascript:[NSString stringWithFormat:@"alert('Left: %@')", region.identifier]];
+}
+
+- (void)locationManager:(CLLocationManager *)manager
+       didFailWithError:(NSError *)error {
+    [super writeJavascript:[NSString stringWithFormat:@"Error: %@", error.description]];
+}
 
 @end

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		950EC6661556A70B0055DE9B /* TimeTracker.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 950EC6641556A70B0055DE9B /* TimeTracker.xcdatamodeld */; };
+		950EC6691556AAE20055DE9B /* Event.m in Sources */ = {isa = PBXBuildFile; fileRef = 950EC6681556AAE20055DE9B /* Event.m */; };
+		950EC66C1556AAE30055DE9B /* Project.m in Sources */ = {isa = PBXBuildFile; fileRef = 950EC66B1556AAE30055DE9B /* Project.m */; };
+		950EC66F1556AB490055DE9B /* DGPTimeTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = 950EC66E1556AB490055DE9B /* DGPTimeTracker.m */; };
 		9520B76A1552FC5C0051FD0F /* Geofencing.m in Sources */ = {isa = PBXBuildFile; fileRef = 9520B7691552FC5C0051FD0F /* Geofencing.m */; };
 		95CE84CD153C798300FBCFB2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CE84CC153C798300FBCFB2 /* Foundation.framework */; };
 		95CE84CF153C798300FBCFB2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CE84CE153C798300FBCFB2 /* UIKit.framework */; };
@@ -40,9 +44,17 @@
 		95CE851A153C798400FBCFB2 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 95CE8519153C798400FBCFB2 /* MainViewController.xib */; };
 		95CE851E153C798400FBCFB2 /* verify.sh in Resources */ = {isa = PBXBuildFile; fileRef = 95CE851D153C798400FBCFB2 /* verify.sh */; };
 		95CE8525153C79CF00FBCFB2 /* www in Resources */ = {isa = PBXBuildFile; fileRef = 95CE8524153C79CF00FBCFB2 /* www */; };
+		95E8A9071556A1AC00CFC861 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95E8A9061556A1AC00CFC861 /* CoreData.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		950EC6651556A70B0055DE9B /* TimeTracker.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TimeTracker.xcdatamodel; sourceTree = "<group>"; };
+		950EC6671556AAE20055DE9B /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Event.h; path = Classes/Event.h; sourceTree = "<group>"; };
+		950EC6681556AAE20055DE9B /* Event.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Event.m; path = Classes/Event.m; sourceTree = "<group>"; };
+		950EC66A1556AAE30055DE9B /* Project.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Project.h; path = Classes/Project.h; sourceTree = "<group>"; };
+		950EC66B1556AAE30055DE9B /* Project.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Project.m; path = Classes/Project.m; sourceTree = "<group>"; };
+		950EC66D1556AB490055DE9B /* DGPTimeTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DGPTimeTracker.h; path = Plugins/DGPTimeTracker.h; sourceTree = "<group>"; };
+		950EC66E1556AB490055DE9B /* DGPTimeTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DGPTimeTracker.m; path = Plugins/DGPTimeTracker.m; sourceTree = "<group>"; };
 		9520B7681552FC5C0051FD0F /* Geofencing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Geofencing.h; path = Plugins/Geofencing.h; sourceTree = "<group>"; };
 		9520B7691552FC5C0051FD0F /* Geofencing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Geofencing.m; path = Plugins/Geofencing.m; sourceTree = "<group>"; };
 		95CE84C8153C798300FBCFB2 /* TikalTimeTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TikalTimeTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -83,6 +95,7 @@
 		95CE851C153C798400FBCFB2 /* README */ = {isa = PBXFileReference; lastKnownFileType = text; name = README; path = Plugins/README; sourceTree = "<group>"; };
 		95CE851D153C798400FBCFB2 /* verify.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = verify.sh; sourceTree = "<group>"; };
 		95CE8524153C79CF00FBCFB2 /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
+		95E8A9061556A1AC00CFC861 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +117,7 @@
 				95CE84E3153C798300FBCFB2 /* MobileCoreServices.framework in Frameworks */,
 				95CE84E5153C798300FBCFB2 /* CoreMedia.framework in Frameworks */,
 				95CE84F0153C798300FBCFB2 /* Cordova.framework in Frameworks */,
+				95E8A9071556A1AC00CFC861 /* CoreData.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,6 +152,7 @@
 		95CE84CB153C798300FBCFB2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				95E8A9061556A1AC00CFC861 /* CoreData.framework */,
 				95CE84CC153C798300FBCFB2 /* Foundation.framework */,
 				95CE84CE153C798300FBCFB2 /* UIKit.framework */,
 				95CE84D0153C798300FBCFB2 /* CoreGraphics.framework */,
@@ -177,6 +192,7 @@
 				95CE8510153C798400FBCFB2 /* Cordova.plist */,
 				95CE8519153C798400FBCFB2 /* MainViewController.xib */,
 				95CE851D153C798400FBCFB2 /* verify.sh */,
+				950EC6641556A70B0055DE9B /* TimeTracker.xcdatamodeld */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -253,6 +269,10 @@
 				95CE8514153C798400FBCFB2 /* AppDelegate.m */,
 				95CE8516153C798400FBCFB2 /* MainViewController.h */,
 				95CE8517153C798400FBCFB2 /* MainViewController.m */,
+				950EC66A1556AAE30055DE9B /* Project.h */,
+				950EC66B1556AAE30055DE9B /* Project.m */,
+				950EC6671556AAE20055DE9B /* Event.h */,
+				950EC6681556AAE20055DE9B /* Event.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -263,6 +283,8 @@
 				95CE851C153C798400FBCFB2 /* README */,
 				9520B7681552FC5C0051FD0F /* Geofencing.h */,
 				9520B7691552FC5C0051FD0F /* Geofencing.m */,
+				950EC66D1556AB490055DE9B /* DGPTimeTracker.h */,
+				950EC66E1556AB490055DE9B /* DGPTimeTracker.m */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
@@ -368,6 +390,10 @@
 				95CE8515153C798400FBCFB2 /* AppDelegate.m in Sources */,
 				95CE8518153C798400FBCFB2 /* MainViewController.m in Sources */,
 				9520B76A1552FC5C0051FD0F /* Geofencing.m in Sources */,
+				950EC6661556A70B0055DE9B /* TimeTracker.xcdatamodeld in Sources */,
+				950EC6691556AAE20055DE9B /* Event.m in Sources */,
+				950EC66C1556AAE30055DE9B /* Project.m in Sources */,
+				950EC66F1556AB490055DE9B /* DGPTimeTracker.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -555,6 +581,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		950EC6641556A70B0055DE9B /* TimeTracker.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				950EC6651556A70B0055DE9B /* TimeTracker.xcdatamodel */,
+			);
+			currentVersion = 950EC6651556A70B0055DE9B /* TimeTracker.xcdatamodel */;
+			path = TimeTracker.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 95CE84BC153C798300FBCFB2 /* Project object */;
 }

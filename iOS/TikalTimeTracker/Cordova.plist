@@ -26,6 +26,8 @@
 	</array>
 	<key>Plugins</key>
 	<dict>
+		<key>DGPTimeTracker</key>
+		<string>DGPTimeTracker</string>
 		<key>Geofencing</key>
 		<string>Geofencing</string>
 		<key>Compass</key>

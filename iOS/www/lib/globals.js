@@ -49,7 +49,18 @@ $('#projectOptions').live("pageshow", function() {
 		
 		//MIKE TODO - Add Check for notifications here. I hardcoded true for now...
 		var shouldnotify = true;
-		$( "#notifyState" ).val((shouldnotify) ? "on" : "off").change();
+		var params = {"fid": project.fid};
+        DGPTimeTracker.getShouldAutoUpdateProjectEvents(
+            params,
+			function(result) {
+				shouldnotify = (result.shouldautoupdate == 0) ? false:true;  
+				$( "#notifyState" ).val((shouldnotify) ? "on" : "off").change();
+			},
+			function(error) {
+				console.log("Error : \r\n"+error); 
+				$( "#notifyState" ).val((shouldnotify) ? "on" : "off").change();     
+			}
+		);
 		
         var here = project.currentlyHere;
         if(here) {

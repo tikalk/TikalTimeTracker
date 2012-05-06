@@ -29,7 +29,7 @@
 	<script type="text/javascript" src="lib/persistencejs/persistence.store.sql.js"></script>
 	<script type="text/javascript" src="lib/persistencejs/persistence.store.websql.js"></script>
 	<script type="text/javascript" charset="utf-8" src="lib/globals.js"></script>
-	<script type="text/javascript" charset="utf-8" src="lib/Geofencing.js"></script>
+	<script type="text/javascript" charset="utf-8" src="lib/DGPTimeTracker.js"></script>
 	
 	<script type="text/javascript">
 	/* When this function is called, Cordova has been initialized and is ready to roll */
@@ -87,6 +87,19 @@
 		project.longitude = currentLocation.location.lng;
 		project.currentlyHere = false;
         persistence.add(project);
+
+		// Send Add to Native Code for Region Monitoring
+		var params = {"fid": currentLocation.id, "projectname": currentLocation.name, "latitude": currentLocation.location.lat, "longitude": currentLocation.location.lng, "address": currentLocation.location.address};
+		console.log(params);
+		DGPTimeTracker.addProject(
+			params,
+			function(result) {
+	           console.log("Success : \r\n"+result);      
+	      	},
+	      	function(error) {
+	           console.log("Error : \r\n"+error);      
+	      	}
+		);
         persistence.flush(function() {
 		  	console.log('Done flushing');
 		  	$.mobile.changePage("#mainPage");	
@@ -135,6 +148,20 @@
 		$.mobile.showPageLoadingMsg();
 		Project.findBy("fid", $.mobile.pageData.fid, function(project) {
 			console.log(project);
+			
+			// Send Remove to Native Code for Region Monitoring
+			var params = {"fid": project.fid, "projectname": project.name, "latitude": project.latitude, "longitude": project.longitude};
+			console.log(params);
+			DGPTimeTracker.removeProject(
+				params,
+				function(result) {
+		           console.log("Success : \r\n"+result);      
+		      	},
+		      	function(error) {
+		           console.log("Error : \r\n"+error);      
+		      	}
+			);
+			
 			persistence.remove(project);
 			persistence.flush(function() {
 			  	console.log('Done flushing');
@@ -151,30 +178,10 @@
 			var here = project.currentlyHere;
 			if(here) {
 			    //MIKE TODO - send check out update
-				var params = {"fid": project.fid, "projectname": project.name, "latitude": project.latitude, "longitude": project.longitude};
-				console.log(params);
-				Geofencing.removeRegion(
-					params,
-					function(result) {
-			           console.log("Success : \r\n"+result);      
-			      	},
-			      	function(error) {
-			           console.log("Error : \r\n"+error);      
-			      	}
-				);
+				
 			} else {
 			   // send check in update
-				var params = {"fid": project.fid, "projectname": project.name, "latitude": project.latitude, "longitude": project.longitude};
-				console.log(params);
-				Geofencing.addRegion(
-					params,
-					function(result) {
-			           console.log("Success : \r\n"+result);      
-			      	},
-			      	function(error) {
-			           console.log("Error : \r\n"+error);      
-			      	}
-				);
+				
 			}
 			project.currentlyHere = !here
 			persistence.flush(function() {
@@ -185,10 +192,23 @@
 		});
 	}
 	
-	function toggleNotify() {
+	function toggleShouldAutoUpdate() {
 		var mytoggle = $( "#notifyState" );
 		var shouldNotify = mytoggle[0].selectedIndex == 1 ? true:false;
 		//MIKE TODO - Toggle Notify;
+		Project.findBy("fid", $.mobile.pageData.fid, function(project) {
+			var params = {"fid": project.fid, "latitude": project.latitude, "longitude": project.longitude, "shouldautoupdate": shouldNotify};
+	        DGPTimeTracker.setShouldAutoUpdateProjectEvents(
+	            params,
+				function(result) {
+					console.log("Success : \r\n"+result);      
+				},
+				function(error) {
+					console.log("Error : \r\n"+error);      
+				}
+			);
+		});
+        
 	}
         
 	// onSuccess Callback
@@ -275,9 +295,9 @@
             <div data-role="fieldcontain">
                     <fieldset data-role="controlgroup">
                         <label for="notifyState">
-                            Notifications
+                            Auto Update: 
                         </label>
-                        <select name="notifyState" id="notifyState" data-theme="b" data-role="slider" onchange="toggleNotify();">
+                        <select name="notifyState" id="notifyState" data-theme="b" data-role="slider" onchange="toggleShouldAutoUpdate();">
                             <option value="off">
                                 Off
                             </option>
