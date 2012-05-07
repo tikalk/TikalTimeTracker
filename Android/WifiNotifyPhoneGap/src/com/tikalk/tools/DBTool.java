@@ -18,25 +18,35 @@ public class DBTool extends SQLiteOpenHelper {
 	/**
 	 * CONSTANTS
 	 */
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 3;
 	public static final String DATABASE_NAME = "wifi_notify";
 	public static final String TABLE_SPOTS = "wifi_spots";
 	public static final String TABLE_TIMES = "checkin_times";
 	public static final String TABLE_PROJECTS = "projects_status";
 
 	//keys
+	//project id as obtained from 4[]
 	public static final String KEY_PROJECT_ID = "project_id";//TEXT
+	//a unique int for sending notifications
 	public static final String KEY_PROJECT_NOTIFY_ID = "notify_id";//INT
+	//ssid of a hotspot
 	public static final String KEY_SSID = "ssid";//TEXT
+	//longitude for a project
 	public static final String KEY_LONGITUDE = "long";//TEXT
+	//latitude for a project
 	public static final String KEY_LATITUDE = "lat";//TEXT
+	//name of a project as provided by 4[]
 	public static final String KEY_PROJECT_NAME = "project_name";//TEXT
+	//int/boolen that declares if currently logged into a specific project
 	public static final String KEY_LOGGED_IN = "logged_in";//INT
+	//a timestamp for a login/logout event
 	public static final String KEY_TIMESTAMP = "timestamp";//TEXT
+	//int/boolean that declares if the project is set up for auto updating
+	public static final String KEY_AUTO_UPDATE = "auto_update";//INT
 
 	//values for logged in int/boolean
-	public static final int LOGGED_IN = 0;
-	public static final int NOT_LOGGED_IN = 1;
+	public static final int BOOL_TRUE = 0;
+	public static final int BOOL_FALSE = 1;
 
 	public static final String HOTSPOT_TABLE_CREATE =
 			"CREATE TABLE " + TABLE_SPOTS + " (" +
@@ -51,7 +61,8 @@ public class DBTool extends SQLiteOpenHelper {
 	public static final String PROJECTS_TABLE_CREATE =
 			"CREATE TABLE " + TABLE_PROJECTS + " (" +
 					KEY_PROJECT_ID + " TEXT, "+ KEY_PROJECT_NOTIFY_ID + " INT, " + KEY_PROJECT_NAME + " TEXT, " +
-					KEY_LOGGED_IN + " INT);";
+					KEY_LOGGED_IN + " INT, " + 
+					KEY_AUTO_UPDATE+ " INT);";
 
 
 
@@ -115,14 +126,21 @@ public class DBTool extends SQLiteOpenHelper {
 		ContentValues values = new ContentValues();
 		values.put(KEY_PROJECT_ID, id); //id for spot
 		values.put(KEY_PROJECT_NAME, projectName); // name of this checkin spot
-		values.put(KEY_LOGGED_IN, NOT_LOGGED_IN);
+		values.put(KEY_LOGGED_IN, BOOL_FALSE);
 		values.put(KEY_PROJECT_NOTIFY_ID, Shared.getNotifyID());//id for the android notification
-
+		values.put(KEY_AUTO_UPDATE, BOOL_TRUE);//all projects are originally set for auto login
 		// Inserting Row
 		long row = db.insert(TABLE_PROJECTS, null, values);
 		return(row != -1);
 	}
 
+	//removes project and all references to it in the table_spots
+	public boolean removeProject(String id){
+		SQLiteDatabase db = this.getWritableDatabase();
+		int projectDelete = db.delete(TABLE_PROJECTS, KEY_PROJECT_ID + "=" + id, null);
+		int spotsDelete = db.delete(TABLE_SPOTS, KEY_PROJECT_ID + "=" + id, null);
+		return(projectDelete>0 && spotsDelete > 0);
+	}
 
 
 	//get id for project
@@ -185,7 +203,7 @@ public class DBTool extends SQLiteOpenHelper {
 		if(loggedIn && !loggedInProject().matches(""))
 			return false;
 		int rowsAffected =0;
-		int loggedInInt = loggedIn?LOGGED_IN:NOT_LOGGED_IN;
+		int loggedInInt = loggedIn?BOOL_TRUE:BOOL_FALSE;
 		SQLiteDatabase db = this.getWritableDatabase();
 
 		ContentValues args = new ContentValues();
@@ -194,12 +212,40 @@ public class DBTool extends SQLiteOpenHelper {
 
 		return(rowsAffected >= 1);
 	}
+	//set auto updates for a specific project
+	public boolean setAutoUpdate(boolean toUpdate, String projectID){
+		SQLiteDatabase db = this.getWritableDatabase();
+
+		ContentValues args = new ContentValues();
+		args.put(KEY_AUTO_UPDATE,((toUpdate)?BOOL_TRUE:BOOL_FALSE));
+		int rowsAffected = db.update(TABLE_PROJECTS, args, KEY_PROJECT_ID + " = \'" + projectID + "\'", null);
+
+		return(rowsAffected >= 1);
+		
+	}
+	//get the auto update value for a specific project
+	public boolean getAutoUpdate(String id){
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		Cursor cursor = db.query(TABLE_PROJECTS, new String[] { 
+				KEY_PROJECT_ID, KEY_AUTO_UPDATE}, KEY_PROJECT_ID + " = " + "\'" +  id + "\'",
+				new String[] {}, null, null, null, null);
+		int status = BOOL_FALSE;
+		if (cursor != null && cursor.getCount()  >= 1){
+			cursor.moveToFirst();
+			status = cursor.getInt(1);
+		}
+		cursor.close();
+		cursor = null;
+		return status == BOOL_TRUE;
+	}
+	
 	//add timestamp
 	public boolean setLoggedInTimestamp(boolean loggedIn, String projectID){
 		if(!existsProject(projectID))
 			return false;
 		int rowsAffected =0;
-		int loggedInInt = loggedIn?LOGGED_IN:NOT_LOGGED_IN;
+		int loggedInInt = loggedIn?BOOL_TRUE:BOOL_FALSE;
 
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues newTimestamp = new ContentValues();
@@ -237,21 +283,21 @@ public class DBTool extends SQLiteOpenHelper {
 		Cursor cursor = db.query(TABLE_PROJECTS, new String[] { 
 				KEY_PROJECT_ID, KEY_LOGGED_IN}, KEY_PROJECT_ID + " = " + "\'" +  projectID + "\'",
 				new String[] {}, null, null, null, null);
-		int status = NOT_LOGGED_IN;
+		int status = BOOL_FALSE;
 		if (cursor != null && cursor.getCount()  >= 1){
 			cursor.moveToFirst();
 			status = cursor.getInt(1);
 		}
 		cursor.close();
 		cursor = null;
-		return status == LOGGED_IN;
+		return status == BOOL_TRUE;
 	}
 	//checks if currently logged into a project, if so then returns projectID
 	public String loggedInProject(){
 		SQLiteDatabase db = this.getReadableDatabase();
 
 		Cursor cursor = db.query(TABLE_PROJECTS, new String[] { 
-				KEY_PROJECT_ID, KEY_LOGGED_IN}, KEY_LOGGED_IN + " = " + LOGGED_IN,
+				KEY_PROJECT_ID, KEY_LOGGED_IN}, KEY_LOGGED_IN + " = " + BOOL_TRUE,
 				new String[] {}, null, null, null, null);
 		String ssid = "";
 		if (cursor != null && cursor.getCount()  >= 1){
@@ -317,7 +363,7 @@ public class DBTool extends SQLiteOpenHelper {
 		// looping through all rows and adding to list
 		if (cursor.moveToFirst()) {
 			do {
-				String loggedIn = cursor.getInt(2) == LOGGED_IN?"--logged in":"--logged out";
+				String loggedIn = cursor.getInt(2) == BOOL_TRUE?"--logged in":"--logged out";
 				spotsList.add(cursor.getString(0) + ", " + cursor.getString(1) + ", "+ loggedIn);
 			} while (cursor.moveToNext());
 		}

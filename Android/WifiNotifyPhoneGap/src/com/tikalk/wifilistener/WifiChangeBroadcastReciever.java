@@ -55,7 +55,8 @@ public class WifiChangeBroadcastReciever extends BroadcastReceiver {
 		boolean hasLoggedIn = !loggedInProject.matches("");
 		/**
 		 * NOTE: THAT THIS FUNCTION CHECKS ACCORDING TO 'OR' LOGIC IF ANY SSID IS PRESENT FOR A CURRENT
-		 * PROJECT IT WILL ADD TO QUEUE TO NOTIFY ACCORDING TO GPS VERIFICATION
+		 * PROJECT IT WILL ADD TO QUEUE TO NOTIFY ACCORDING TO GPS VERIFICATION (IF NO
+		 * OTHER PROJECT IS CHECKED IN)
 		 */
 		//build list and set to static object for current wifi spots
 		List<String> current = new ArrayList<String>();

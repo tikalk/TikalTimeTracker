@@ -31,12 +31,12 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 	public static final float MAX_DIST = 500.0f;
 	//constant for min distance for a logout if user is less than that distance away won't perform logout
 	public static final float MIN_DIST = 30.0f;
-	
+
 	//KEYS FOR BUNDLE
 	//value that lets the phonegap activity know that it is being called form a notification
 	public static final String KEY_CALLER = "caller";
-	
-	
+
+
 	/**
 	 * MEMBERS
 	 */
@@ -49,16 +49,16 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		context.unregisterReceiver(this);
 		//grab database
 		mDB = new DBTool(context);
-	      
-	    String key = LocationManager.KEY_LOCATION_CHANGED;
-	    Location location = (Location)intent.getExtras().get(key);
-	    if(location != null){
-	    	Log.d("location test", "location recieved at " + System.currentTimeMillis() + 
-	    			" location is <" + printLocation(location) + ">");
-	    	//check queue and dequeue all items and perform actions
-	    	while(Shared.queueHasNext()){
-	    		PendingEvent pending = Shared.queueGetNext();
-	    		/*if(pending.getType() == PendingEvent.EVENT_ADD_POINT)
+
+		String key = LocationManager.KEY_LOCATION_CHANGED;
+		Location location = (Location)intent.getExtras().get(key);
+		if(location != null){
+			Log.d("location test", "location recieved at " + System.currentTimeMillis() + 
+					" location is <" + printLocation(location) + ">");
+			//check queue and dequeue all items and perform actions
+			while(Shared.queueHasNext()){
+				PendingEvent pending = Shared.queueGetNext();
+				/*if(pending.getType() == PendingEvent.EVENT_ADD_POINT)
 	    			addSpot(pending.getSSID(), location);
 	    		else*/ if(pending.getType() == PendingEvent.EVENT_VERIFY_LOGIN_SPOT){
 	    			verifyLogin(pending.getSSID(), location, context);
@@ -66,9 +66,9 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 	    		else if(pending.getType() == PendingEvent.EVENT_LOGOUT){
 	    			verifyLogout(pending.getSSID(), location, context);
 	    		}
-	    	}
-	    }
-	    mDB.close();
+			}
+		}
+		mDB.close();
 	}
 	//verify user is logging into correct location
 	private void verifyLogin(String ssid, Location verifyLoc, Context context) {
@@ -77,11 +77,20 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		float dist = origLoc.distanceTo(verifyLoc);
 		if(dist < MAX_DIST){
 			String projectName = mDB.getProjectName(ssid);
-			int id = mDB.getNotificationID(projectName);
-			addNotification(true, projectName, id, context);
+
+			String projectID = mDB.getID(projectName);
+			//if project is set for auto-update then login/logout
+			if(mDB.getAutoUpdate(projectID)){
+				//if loggin in passes, then log timestamp
+				if(mDB.setLoggedIn(true, projectID))
+					mDB.setLoggedInTimestamp(true, projectID);
+			}else{
+				int id = mDB.getNotificationID(projectName);
+				addNotification(true, projectName, id, context);
+			}
 		}
 	}
-	
+
 	//verify user is far enough away(MIN_DIST) to logout
 	private void verifyLogout(String ssid, Location verifyLoc, Context context) {
 		//verify that spot is within a certain distance if so then post notification
@@ -89,15 +98,25 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		float dist = origLoc.distanceTo(verifyLoc);
 		if(dist > MIN_DIST){
 			String projectName = mDB.getProjectName(ssid);
-			int id = mDB.getNotificationID(projectName);
-			addNotification(false, projectName, id, context);
+
+			//if project is set for auto-update then login/logout
+			String projectID = mDB.getID(projectName);
+			if(mDB.getAutoUpdate(projectID)){
+				//if loggin in passes, then log timestamp
+				if(mDB.setLoggedIn(false, projectID))
+					mDB.setLoggedInTimestamp(false, projectID);
+			}else{
+				int id = mDB.getNotificationID(projectName);
+				addNotification(false, projectName, id, context);
+			}
+
 		}
 	}
-//
-//	//add spot to database
-//	private void addSpot(String ssid, Location location) {
-//		mDB.addPoint(ssid, "", "" +  location.getLongitude(), "" + location.getLatitude());
-//	}
+	//
+	//	//add spot to database
+	//	private void addSpot(String ssid, Location location) {
+	//		mDB.addPoint(ssid, "", "" +  location.getLongitude(), "" + location.getLatitude());
+	//	}
 
 
 	//TODO used for testing
@@ -115,13 +134,13 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		}
 		return retVal;
 	}
-	
+
 	//user has encountered or left a tagged spot so pop notificaton
 	private void addNotification(boolean loggingIn, String projectName,int notifyID,  Context context) {
-		
+
 		/*Location spotLoc = mDB.getLocation(ssid);
 		Log.d("notify", "user is close to " + ssid + " at " + spotLoc.getLatitude() + "," + spotLoc.getLongitude());
-		*///init login/logout variables
+		 *///init login/logout variables
 		String loginString1 = "", loginString2 = "";
 		String title = "";
 		if(loggingIn){
@@ -151,11 +170,11 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		notificationIntent.putExtra(Defined.KEY_PROJECT_NAME, projectName);
 		notificationIntent.putExtra(Defined.KEY_LOGGING_IN, loggingIn);
 		notificationIntent.putExtra(Defined.KEY_PROJECT_ID, mDB.getID(projectName));
-		
+
 		PendingIntent contentIntent = PendingIntent.getActivity(context,notifyID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-		
+
 		//add vibrate
 		long[] vibrate = {0,100,200,300, 0, 0, 100, 100, 0, 0, 0, 100, 100, 0, 0, 0, 0, 0, 300, 300, 300};
 		notification.vibrate = vibrate;
@@ -163,16 +182,16 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		notification.flags |= Notification.FLAG_ONLY_ALERT_ONCE | Notification.FLAG_AUTO_CANCEL;
 		mNotificationManager.notify(notifyID, notification);
 	}
-	
+
 	/**
 	 * STATIC METHODS
 	 */
-	
+
 	public static void startSingleUpdate(Context context){
 		//if we are already requesting the location then don't re-request
 		if(Shared.mRequestingLocation)
 			return;
-		
+
 		Shared.mRequestingLocation = true;
 		//set listener
 		Log.d("location test", "starting single update at " + System.currentTimeMillis());
@@ -183,23 +202,23 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		Intent updateIntent = new Intent(SINGLE_LOCATION_UPDATE_ACTION);  
 		PendingIntent singleUpatePI = PendingIntent.getBroadcast(context, 0, updateIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		Criteria criteria = new Criteria();
-	    String majorProvider = locationManager.getBestProvider(criteria, true);
-	    Log.d("location test", "major provider " + majorProvider);
-	    List<String> allProviders = locationManager.getAllProviders();
-	    for(int i=0; i < allProviders.size();i++){
-	    	Log.d("location test", "provider " + i + ": " + allProviders.get(i));
-			
-	    }
-	    Log.d("location test", "enabled...");
-	    allProviders = locationManager.getProviders(true);
-	    for(int i=0; i < allProviders.size();i++){
-	    	Log.d("location test", "enabled provider " + i + ": " + allProviders.get(i));
-			
-	    }
-		
-	    //set listener
+		String majorProvider = locationManager.getBestProvider(criteria, true);
+		Log.d("location test", "major provider " + majorProvider);
+		List<String> allProviders = locationManager.getAllProviders();
+		for(int i=0; i < allProviders.size();i++){
+			Log.d("location test", "provider " + i + ": " + allProviders.get(i));
+
+		}
+		Log.d("location test", "enabled...");
+		allProviders = locationManager.getProviders(true);
+		for(int i=0; i < allProviders.size();i++){
+			Log.d("location test", "enabled provider " + i + ": " + allProviders.get(i));
+
+		}
+
+		//set listener
 		locationManager.requestSingleUpdate("network", singleUpatePI);
-		
+
 	}
 
 }

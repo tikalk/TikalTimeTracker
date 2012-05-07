@@ -111,6 +111,47 @@
 			}
 		}
 	}
+	function getAutoStatus(){
+		var projectID =  document.getElementById('projectIDAuto').value;
+		window.plugins.WifiListener.getShouldAutoUpdateProjectEvents({	"fid": projectID }, 
+			function(r) {
+			console.log(r);
+				if (r) {
+	 				document.getElementById('inputID').setAttribute("checked", "checked");
+	 			}
+	 			else {
+	 				document.getElementById('inputID').removeAttribute("checked");
+	 			}
+		}, function(e) {
+			console.log(e)
+		});
+// 		window.plugins.WifiListener.getShouldAutoUpdateProjectEvents({	"fid": projectID }, function(r) {
+// 			alert( "auto is " + r);
+// 			console.log("auto is " + r);
+// 			var form = document.getElementById('getAuto');
+// 			form.auto.value = r;
+// 			if (form.auto.value) {
+// 				document.getElementById('inputID').setAttribute("checked", "checked");
+// 			}
+// 			else {
+// 				document.getElementById('inputID').removeAttribute("checked");
+// 			}
+// 		}, function(e) {
+// 			alert( "fail auto is " + e);
+// 			console.log(" get status failed " + e);
+// 		});
+	}
+	function setAutoStatus(){
+		var projectID =  document.getElementById('projectIDAuto').value;
+		var autoUpdate = document.getElementById('inputID').checked;
+		alert(" setting for project " + projectID + "  with auto of  " + autoUpdate);
+		window.plugins.WifiListener.setShouldAutoUpdateProjectEvents({	"fid": projectID, "shouldautoupdate":autoUpdate }, 
+				function(r) {
+					alert("set with " + r);
+			}, function(e) {
+				alert("set failed with " + e);
+			});
+	}
 </script>
 </head>
 <body onload="onLoad();">
@@ -137,11 +178,21 @@
 		grab all local ssids when added</h3>
 	<div id="spots2">refreshed: 0</div>
 	<button onClick="getLog()">Print Log</button>
+	<div id="log"></div>
 	<BR />
-	<button onClick="getWifyState()">Get Wifi State</button><div id="wifi_state"></div>
+	<button onClick="getWifyState()">Get Wifi State</button>
+	<div id="wifi_state"></div>
+	<BR />
+	<BR /> Get auto checkin status
+	<BR /> Project ID
+	<INPUT TYPE="text" id="projectIDAuto" VALUE="">
+	<BR />
+	<input type="checkbox" name="auto" value="AutoLog" id="inputID" />Auto
+	<button onClick="getAutoStatus()">get</button>
+	<button onClick="setAutoStatus()">set</button>
 	<BR />
 	<button onClick="turnWifiOff()">Turn Wifi off</button>
 	<button onClick="turnWifiOn()">Turn Wifi on</button>
-	<div id="log"></div>
+
 </body>
 </html>

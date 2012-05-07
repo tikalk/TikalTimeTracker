@@ -203,32 +203,32 @@ WifiListener.prototype.set_wifi_state = function(data, successCallback, failureC
 /**
  * returns boolean if project is enabled for notifications
  * 
- * @param data				"project_id" - will return this projects notification state
+ * @param data				"fid" - project id and will return if auto-or manual updating state
  * @param successCallback	The success callback (returns boolean: if true notifications are enabled for this project)
  * @param failureCallback	The error callback
  */
-WifiListener.prototype.get_project_notify_state = function(data, successCallback, failureCallback) {
+WifiListener.prototype.getShouldAutoUpdateProjectEvents = function(data, successCallback, failureCallback) {
 	return PhoneGap.exec(
 			successCallback,			 
 			failureCallback,						
 			'WifiListener',				
-			'get_project_notify_state',								
+			'getShouldAutoUpdateProjectEvents',								
 			[data]);
 };
 
 /**
  * sets the project notify state for a given 
  * 
- * @param data				"project_id" - will return this projects notification state
+ * @param data				"fid" - project id, "shouldautoupdate" - boolean to autoupdate or notify
  * @param successCallback	The success callback (returns boolean: if true notifications are enabled for this project)
  * @param failureCallback	The error callback
  */
-WifiListener.prototype.set_project_notify_state = function(data, successCallback, failureCallback) {
+WifiListener.prototype.setShouldAutoUpdateProjectEvents = function(data, successCallback, failureCallback) {
 	return PhoneGap.exec(
 			successCallback,			 
 			failureCallback,						
 			'WifiListener',				
-			'set_project_notify_state',								
+			'setShouldAutoUpdateProjectEvents',								
 			[data]);
 };
 

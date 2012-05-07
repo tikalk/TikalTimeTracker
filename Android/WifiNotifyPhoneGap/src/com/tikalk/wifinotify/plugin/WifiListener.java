@@ -57,11 +57,13 @@ public class WifiListener extends Plugin {
 	//request to change wifi state
 	public static final String ACTION_SET_WIFI_STATE = "set_wifi_state";
 	//request project notification state
-	public static final String ACTION_GET_NOTIFICATION_STATE = "get_project_notify_state";
+	public static final String ACTION_GET_SHOULD_AUTO_UPDATE = "getShouldAutoUpdateProjectEvents";
 	//set project notification state
-	public static final String ACTION_SET_NOTIFICATION_STATE = "SET_project_notify_state";
+	public static final String ACTION_SET_SHOULD_AUTO_UPDATE = "setShouldAutoUpdateProjectEvents";
 
-
+	//KEY CONSTANTS
+	public static final String KEY_PROJECT_ID = "fid";
+	public static final String KEY_SHOULD_UPDATE_BOOL = "shouldautoupdate";
 
 	@Override
 	public PluginResult execute(String action, JSONArray data, String callBackID) {
@@ -217,6 +219,8 @@ public class WifiListener extends Plugin {
 		}
 		else if(action.matches(ACTION_GET_WIFI_STATE)){
 			WifiManager wMNG = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
+			//close db
+			db.close();
 			return new PluginResult(Status.OK, wMNG.isWifiEnabled());
 		}
 		else if(action.matches(ACTION_SET_WIFI_STATE)){
@@ -230,15 +234,38 @@ public class WifiListener extends Plugin {
 			}
 			WifiManager wifiManager = (WifiManager)ctx.getSystemService(Context.WIFI_SERVICE);
 			wifiManager.setWifiEnabled(state);
+			//close db
+			db.close();
 			//return current wifi state
 			return new PluginResult(Status.OK, wifiManager.isWifiEnabled());
 			
 		}
-		else if(action.matches(ACTION_GET_NOTIFICATION_STATE)){
-
+		else if(action.matches(ACTION_GET_SHOULD_AUTO_UPDATE)){
+			String projectID;
+			try {
+				projectID = data.getJSONObject(0).getString(KEY_PROJECT_ID);
+			} catch (JSONException e) {
+				db.close();
+				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
+			}
+			boolean shouldAuto = db.getAutoUpdate(projectID);
+			db.close();
+			return new PluginResult(Status.OK,shouldAuto);
 		}
-		else if(action.matches(ACTION_SET_NOTIFICATION_STATE)){
-
+		else if(action.matches(ACTION_SET_SHOULD_AUTO_UPDATE)){
+			String projectID;
+			boolean shouldAuto;
+			try {
+				projectID = data.getJSONObject(0).getString(KEY_PROJECT_ID);
+				shouldAuto = data.getJSONObject(0).getBoolean(KEY_SHOULD_UPDATE_BOOL);
+				
+			} catch (JSONException e) {
+				db.close();
+				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
+			}
+			boolean boolResult = db.setAutoUpdate(shouldAuto, projectID);
+			db.close();
+			return new PluginResult(Status.OK,boolResult);
 		}
 
 
