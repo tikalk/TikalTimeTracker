@@ -73,6 +73,20 @@
 			console.log(e)
 		});
 	}
+	function turnWifiOff(){
+		window.plugins.WifiListener.set_wifi_state({	"state": false }, function(r) {
+			console.log(r);
+		}, function(e) {
+			console.log(e);
+		});
+	}
+	function turnWifiOn(){
+		window.plugins.WifiListener.set_wifi_state({	"state": true }, function(r) {
+			console.log(r);
+		}, function(e) {
+			console.log(e);
+		});
+	}
 	
 	//timelog functions
 	function getLog() {
@@ -125,6 +139,9 @@
 	<button onClick="getLog()">Print Log</button>
 	<BR />
 	<button onClick="getWifyState()">Get Wifi State</button><div id="wifi_state"></div>
+	<BR />
+	<button onClick="turnWifiOff()">Turn Wifi off</button>
+	<button onClick="turnWifiOn()">Turn Wifi on</button>
 	<div id="log"></div>
 </body>
 </html>

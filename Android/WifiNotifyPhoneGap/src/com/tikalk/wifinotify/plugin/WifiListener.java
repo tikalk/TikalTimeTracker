@@ -220,6 +220,18 @@ public class WifiListener extends Plugin {
 			return new PluginResult(Status.OK, wMNG.isWifiEnabled());
 		}
 		else if(action.matches(ACTION_SET_WIFI_STATE)){
+			//grab boolean param
+			Boolean state;
+			try {
+				state = data.getJSONObject(0).getBoolean("state");
+			} catch (JSONException e) {
+				db.close();
+				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
+			}
+			WifiManager wifiManager = (WifiManager)ctx.getSystemService(Context.WIFI_SERVICE);
+			wifiManager.setWifiEnabled(state);
+			//return current wifi state
+			return new PluginResult(Status.OK, wifiManager.isWifiEnabled());
 			
 		}
 		else if(action.matches(ACTION_GET_NOTIFICATION_STATE)){
