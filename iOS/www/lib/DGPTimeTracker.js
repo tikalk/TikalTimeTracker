@@ -45,6 +45,7 @@ var DGPTimeTracker = {
 	#define KEY_REGION_ID       				@"fid"
 	Returns
 	#define KEY_PROJECT_SHOULD_AUTO_UPDATE      @"shouldautoupdate"
+	#define KEY_PROJECT_CURRENTLY_HERE          @"currentlyhere"
 	*/
      getShouldAutoUpdateProjectEvents: function(params, success, fail) {
           return PhoneGap.exec(success, fail, "DGPTimeTracker", "getShouldAutoUpdateProjectEvents", [params]);

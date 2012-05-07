@@ -11,6 +11,7 @@
 #define KEY_PROJECT_NAME                    @"projectname"
 #define KEY_PROJECT_ADDRESS                 @"projectaddress"
 #define KEY_PROJECT_SHOULD_AUTO_UPDATE      @"shouldautoupdate"
+#define KEY_PROJECT_CURRENTLY_HERE          @"currentlyhere"
 
 enum DGPTimeTrackerStatusCode {
     PROJECTNOTFOUND = 20
@@ -27,8 +28,10 @@ typedef NSUInteger DGPTimeTrackerStatusCode;
 - (void)checkoutOfProject:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 
 - (void)returnTimeTrackerError: (NSUInteger) errorCode withMessage: (NSString*) message;
--(void) doCheckIn:(NSString *)fid;
--(void) doCheckOut:(NSString *)fid;
+- (void) doCheckIn:(NSString *)fid;
+- (void) doCheckOut:(NSString *)fid;
+- (void) postLocalNotificationWithMessage:(NSString *)message;
+- (void) forceCheckoutFromAllProjects;
 // CoreData Functions
 - (NSManagedObjectContext *) managedObjectContext;
 

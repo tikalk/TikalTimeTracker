@@ -21,7 +21,6 @@ var Project = persistence.define('Project', {
 
 $('#mainPage').live("pageshow", function() {
 	// Load Current Projects from WebSQL Database and refresh Listview
-	console.log("main page show");
     persistence.store.websql.config(persistence, 'tikaltimetracker', 'Tikal Time Tracker DB', 5 * 1024 * 1024);
 	persistence.schemaSync(function(tx) { 
 		var projects = Project.all(); // Returns QueryCollection of all Projects in Database
@@ -35,7 +34,6 @@ $('#mainPage').live("pageshow", function() {
 			//Call the listview jQuery UI Widget after adding 
 			//items to the list allowing correct rendering
 			list.listview( "refresh" );
-			console.log("refresh project listview");
 		});
 	});                
 });
@@ -55,20 +53,21 @@ $('#projectOptions').live("pageshow", function() {
 			function(result) {
 				shouldnotify = (result.shouldautoupdate == 0) ? false:true;  
 				$( "#notifyState" ).val((shouldnotify) ? "on" : "off").change();
+				var here = result.currentlyhere;
+		        if(here) {
+		            $("#btnCheckin .ui-btn-text").text("Check Out");
+		        } else {
+		            $("#btnCheckin .ui-btn-text").text("Check In");
+		        }
+				$.mobile.hidePageLoadingMsg();
 			},
 			function(error) {
 				console.log("Error : \r\n"+error); 
-				$( "#notifyState" ).val((shouldnotify) ? "on" : "off").change();     
+				$( "#notifyState" ).val((shouldnotify) ? "on" : "off").change();
+				$("#btnCheckin .ui-btn-text").text("Check In");   
+		        $.mobile.hidePageLoadingMsg();  
 			}
 		);
-		
-        var here = project.currentlyHere;
-        if(here) {
-            $("#btnCheckin .ui-btn-text").text("Check Out");
-        } else {
-            $("#btnCheckin .ui-btn-text").text("Check In");
-        }
-        $.mobile.hidePageLoadingMsg();
 	});               
 });
 						

@@ -10,6 +10,7 @@
 #import "AppDelegate.h"
 #import "Project.h"
 #import "Event.h"
+#import "NSDate+Utils.h"
 
 @implementation DGPTimeTracker
 
@@ -32,7 +33,7 @@
     project.address = projectAddress;
     project.latitude = [NSNumber numberWithDouble:[latitude doubleValue]];
     project.longitude = [NSNumber numberWithDouble:[longitude doubleValue]];
-    project.currentlyHere = [NSNumber numberWithBool:0];
+    project.currentlyHere = [NSNumber numberWithBool:NO];
     project.shouldAutoUpdate = [NSNumber numberWithBool:1];
     
     [self.managedObjectContext insertObject:project];
@@ -238,12 +239,29 @@
         return;
     }
     
-    Project *project = [items objectAtIndex:0];
-    NSMutableDictionary* posError = [NSMutableDictionary dictionaryWithCapacity:2];
-    [posError setObject: [NSNumber numberWithInt: CDVCommandStatus_OK] forKey:@"code"];
-    [posError setObject: project.shouldAutoUpdate forKey: KEY_PROJECT_SHOULD_AUTO_UPDATE];
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:posError];
-    [super writeJavascript:[result toSuccessCallbackString:callbackId]];
+    if (1) {
+        Project *project = [items objectAtIndex:0];
+        NSMutableDictionary* posError = [NSMutableDictionary dictionaryWithCapacity:2];
+        [posError setObject: [NSNumber numberWithInt: CDVCommandStatus_OK] forKey:@"code"];
+        [posError setObject: project.shouldAutoUpdate forKey: KEY_PROJECT_SHOULD_AUTO_UPDATE];
+        [posError setObject: project.currentlyHere forKey: KEY_PROJECT_CURRENTLY_HERE];
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:posError];
+        [super writeJavascript:[result toSuccessCallbackString:callbackId]];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
+        [fetchRequest setEntity:entity];
+        
+        NSError *dberror;
+        NSArray *items = [self.managedObjectContext executeFetchRequest:fetchRequest error:&dberror];
+        [fetchRequest release];
+        
+        for (Project *project in items) {
+            for (Event *event in project.event) {
+                NSLog(@"Project: %@ : Checkin: %@, Checkout: %@", ((Project*)event.project).name, event.checkin, event.checkout);
+            }
+        }
+    }   
 }
 
 
@@ -275,7 +293,8 @@
     [super writeJavascript:[result toSuccessCallbackString:callbackId]];
 }
 
--(void) doCheckIn:(NSString *)fid {    
+-(void) doCheckIn:(NSString *)fid {   
+    
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
     [fetchRequest setEntity:entity];
@@ -292,17 +311,40 @@
         return;
     }
     
+    // Now check out of any current projects
+    [self forceCheckoutFromAllProjects];
+    
     Project *project = [items objectAtIndex:0];
+    
+    project.currentlyHere = [NSNumber numberWithBool:YES];
     
     // Create New Event Item
     Event *event = [[Event alloc] initWithEntity:[NSEntityDescription entityForName:@"Event" inManagedObjectContext:self.managedObjectContext]  insertIntoManagedObjectContext:self.managedObjectContext];
-    event.checkin = [NSDate date];
-    event.checkout = nil;
+    event.checkin = [[NSDate date] toLocalTime];
+    event.checkout = event.checkin;
     [project addEventObject:event];
     
     NSError *dberror1;
     if (![self.managedObjectContext save:&dberror1]) {
         NSLog(@"Error deleting - error:%@",dberror1);
+    }
+    
+    [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have checked in to %@.", nil), project.name]];
+}
+
+- (void) forceCheckoutFromAllProjects {
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+	
+    NSError *dberror;
+    NSArray *items = [self.managedObjectContext executeFetchRequest:fetchRequest error:&dberror];
+    [fetchRequest release];
+    
+    for (Project *project in items) {
+        if (project.currentlyHere == [NSNumber numberWithBool:YES]) {
+            [self doCheckOut:project.fid];
+        }
     }
 }
 
@@ -329,8 +371,9 @@
     NSSet *events = project.event;
     
     for (Event *event in events.allObjects) {
-        if (event.checkout == nil) {
-            event.checkout = [NSDate date];
+        if ([event.checkout isEqualToDate:event.checkin]) {
+            event.checkout = [[NSDate date] toLocalTime];
+            project.currentlyHere = [NSNumber numberWithBool:NO];
         }
     }
     
@@ -338,6 +381,8 @@
     if (![self.managedObjectContext save:&dberror1]) {
         NSLog(@"Error deleting - error:%@",dberror1);
     }
+    
+    [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have checked out of %@.", nil), project.name]];
 }
 
 - (void)returnTimeTrackerError: (NSUInteger) errorCode withMessage: (NSString*) message
@@ -378,10 +423,12 @@
     }
     
     Project *project = [items objectAtIndex:0];
-    [super writeJavascript:[NSString stringWithFormat:@"alert('Entered: %@')", project.name]];
+    
     if (project.shouldAutoUpdate) {
         [self doCheckIn:project.fid];
-    }    
+    }
+    
+    [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have arrived at %@.", nil), project.name]];
 }
 
 - (void) locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region
@@ -405,10 +452,54 @@
     }
     
     Project *project = [items objectAtIndex:0];
-    [super writeJavascript:[NSString stringWithFormat:@"alert('Left: %@')", project.name]];
+    
     if (project.shouldAutoUpdate) {
         [self doCheckOut:project.fid];
     } 
+    
+    [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have left %@.", nil), project.name]];
+}
+
+- (void)locationManager:(CLLocationManager *)manager monitoringDidFailForRegion:(CLRegion *)region withError:(NSError *)error {
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    NSString *fid = region.identifier;
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"fid=%@", fid];
+	[fetchRequest  setPredicate:predicate];
+	
+    NSError *dberror;
+    NSArray *items = [self.managedObjectContext executeFetchRequest:fetchRequest error:&dberror];
+    [fetchRequest release];
+	
+    if (items.count == 0) {
+        [self returnTimeTrackerError:PROJECTNOTFOUND withMessage: @"Project was not found"];
+        return;
+    }
+    
+    [self.locationManager stopMonitoringForRegion:region];
+    Project *project = [items objectAtIndex:0];
+    project.shouldAutoUpdate = NO; 
+    NSError *dberror1;
+    if (![self.managedObjectContext save:&dberror1]) {
+        NSLog(@"Error deleting - error:%@",dberror1);
+    }
+    
+    [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"Failed to monitor: %@ with error: %@.", nil), project.name, error.description]];
+}
+
+-(void) postLocalNotificationWithMessage:(NSString *)message {
+    UILocalNotification *localNotif = [[UILocalNotification alloc] init];
+    if (localNotif) {
+        localNotif.alertBody = message;
+        //localNotif.alertAction = NSLocalizedString(@"Read Message", nil);
+        //localNotif.soundName = @"alarmsound.caf";
+        //localNotif.applicationIconBadgeNumber = 1;
+        [[UIApplication sharedApplication] presentLocalNotificationNow:localNotif];
+        [localNotif release];
+    }
 }
 
 @end

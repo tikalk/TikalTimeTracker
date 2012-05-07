@@ -59,7 +59,6 @@
 		projects.list(null, function (results) {
 		    results.forEach(function (projectentityitem) {
 		        if(id == projectentityitem.fid) {
-					console.log("id exists");
 					$.mobile.changePage("#mainPage");
 					boolProjectExists = true;
 				}
@@ -90,18 +89,14 @@
 
 		// Send Add to Native Code for Region Monitoring
 		var params = {"fid": currentLocation.id, "projectname": currentLocation.name, "latitude": currentLocation.location.lat, "longitude": currentLocation.location.lng, "address": currentLocation.location.address};
-		console.log(params);
 		DGPTimeTracker.addProject(
 			params,
-			function(result) {
-	           console.log("Success : \r\n"+result);      
+			function(result) {     
 	      	},
-	      	function(error) {
-	           console.log("Error : \r\n"+error);      
+	      	function(error) {     
 	      	}
 		);
         persistence.flush(function() {
-		  	console.log('Done flushing');
 		  	$.mobile.changePage("#mainPage");	
 			$.mobile.hidePageLoadingMsg();
 		});
@@ -147,24 +142,19 @@
 		
 		$.mobile.showPageLoadingMsg();
 		Project.findBy("fid", $.mobile.pageData.fid, function(project) {
-			console.log(project);
 			
 			// Send Remove to Native Code for Region Monitoring
 			var params = {"fid": project.fid, "projectname": project.name, "latitude": project.latitude, "longitude": project.longitude};
-			console.log(params);
 			DGPTimeTracker.removeProject(
 				params,
-				function(result) {
-		           console.log("Success : \r\n"+result);      
+				function(result) {     
 		      	},
-		      	function(error) {
-		           console.log("Error : \r\n"+error);      
+		      	function(error) {      
 		      	}
 			);
 			
 			persistence.remove(project);
 			persistence.flush(function() {
-			  	console.log('Done flushing');
 			  	$.mobile.changePage("#mainPage");	
 				$.mobile.hidePageLoadingMsg();
 			});
@@ -173,43 +163,50 @@
 	
 	function toggleCheckin() {
 		$.mobile.showPageLoadingMsg();
+		var params = {"fid": $.mobile.pageData.fid};
+        DGPTimeTracker.getShouldAutoUpdateProjectEvents(
+            params,
+			function(result) {
+				var here = result.currentlyhere;
+				if(here) {
+				    //MIKE TODO - send check out update
+					var params = {"fid": $.mobile.pageData.fid};
+			        DGPTimeTracker.checkoutOfProject(
+			            params,
+						toggleCheckinSuccess,
+						toggleCheckinError
+					);
+				} else {
+				   // send check in update
+					var params = {"fid": $.mobile.pageData.fid};
+			        DGPTimeTracker.checkinToProject(
+			            params,
+						toggleCheckinSuccess,
+						toggleCheckinError
+					);
+				}
+			},
+			function(error) {   
+		        $.mobile.hidePageLoadingMsg();  
+			}
+		);
+	}
+	
+	function toggleCheckinSuccess() {
 		Project.findBy("fid", $.mobile.pageData.fid, function(project) {
 			//console.log(project);
 			var here = project.currentlyHere;
-			if(here) {
-			    //MIKE TODO - send check out update
-				var params = {"fid": project.fid};
-				console.log("checkout");
-		        DGPTimeTracker.checkoutOfProject(
-		            params,
-					function(result) {
-						console.log("Success : \r\n"+result);      
-					},
-					function(error) {
-						console.log("Error : \r\n"+error);      
-					}
-				);
-			} else {
-			   // send check in update
-				var params = {"fid": project.fid};
-				console.log("checkin");
-		        DGPTimeTracker.checkinToProject(
-		            params,
-					function(result) {
-						console.log("Success : \r\n"+result);      
-					},
-					function(error) {
-						console.log("Error : \r\n"+error);      
-					}
-				);
-			}
 			project.currentlyHere = !here
 			persistence.flush(function() {
-			  	console.log('Done flushing');
 			  	$.mobile.changePage("#mainPage");	
 				$.mobile.hidePageLoadingMsg();
 			});
 		});
+	}
+	
+	function toggleCheckinError() {
+		$.mobile.changePage("#mainPage");	
+		$.mobile.hidePageLoadingMsg();
 	}
 	
 	function toggleShouldAutoUpdate() {
@@ -220,15 +217,12 @@
 			var params = {"fid": project.fid, "latitude": project.latitude, "longitude": project.longitude, "shouldautoupdate": shouldNotify};
 	        DGPTimeTracker.setShouldAutoUpdateProjectEvents(
 	            params,
-				function(result) {
-					console.log("Success : \r\n"+result);      
+				function(result) {      
 				},
-				function(error) {
-					console.log("Error : \r\n"+error);      
+				function(error) {     
 				}
 			);
 		});
-        
 	}
         
 	// onSuccess Callback
