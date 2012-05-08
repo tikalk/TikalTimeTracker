@@ -4,7 +4,7 @@
 <title>PhoneGap</title>
 <LINK REL=StyleSheet HREF="main.css" TYPE="text/css">
 <script type="text/javascript" charset="utf-8" src="cordova-1.6.0.js"></script>
-<script type="text/javascript" charset="utf-8" src="wifi_listener.js"></script>
+<script type="text/javascript" charset="utf-8" src="DGPTimeTracker.js"></script>
 <script type="text/javascript" charset="utf-8">
 	var times = 0;
 
@@ -17,10 +17,12 @@
     	var longitude = form.longitude.value;
     	var latitude = form.latitude.value;
     	//alert (project + "," + id + "," + longitude + "," + latitude);
-    	window.plugins.WifiListener.set_point({	"projectname": project,
-    											"projectid":id, 
+    	DGPTimeTracker.addProject({	"projectname": project,
+    											"fid":id, 
     											"longitude":longitude,
-    											"latitude":latitude }, 
+    											"latitude":latitude,
+    											"address":"test"
+    											}, 
     											successAdd, failedAdd);
 	}
 	function successAdd(){
@@ -35,7 +37,7 @@
 		document.addEventListener("deviceready", onDeviceReady, true);
 	}
 	function onDeviceReady() {
-		window.plugins.WifiListener.service_running("", function(r) {
+		DGPTimeTracker.service_running("", function(r) {
 			console.log("service running " + r)
 		}, function(e) {
 			console.log("start running check failure: " + e)
@@ -45,7 +47,7 @@
 	//service functions
 	//device is ready run startup mechanisms
 	function startService() {
-		window.plugins.WifiListener.start("", function(r) {
+		DGPTimeTracker.start("", function(r) {
 			console.log("start success " + r);
 			onDeviceReady();
 		}, function(e) {
@@ -53,20 +55,20 @@
 			onDeviceReady();
 		});
 
-		//window.plugins.WifiListener.get_active("", function(r){successList(r)}   ,function(e){console.log(e)});
+		//DGPTimeTracker.get_active("", function(r){successList(r)}   ,function(e){console.log(e)});
 	}
 	function stopService() {
-		window.plugins.WifiListener.stop("", function(r) {
+		DGPTimeTracker.stop("", function(r) {
 			console.log("stop success " + r);
 			onDeviceReady();
 		}, function(e) {
 			console.log("stop failure: " + e);
 			onDeviceReady();
 		});
-		//window.plugins.WifiListener.get_active("", function(r){successList(r)}   ,function(e){console.log(e)});
+		//DGPTimeTracker.get_active("", function(r){successList(r)}   ,function(e){console.log(e)});
 	}
 	function getWifyState(){
-		window.plugins.WifiListener.get_wifi_state("", function(r) {
+		DGPTimeTracker.get_wifi_state("", function(r) {
 			var wifistate = document.getElementById('wifi_state');
 			wifistate.innerHTML = "wifi state is " + r;
 		}, function(e) {
@@ -74,14 +76,14 @@
 		});
 	}
 	function turnWifiOff(){
-		window.plugins.WifiListener.set_wifi_state({	"state": false }, function(r) {
+		DGPTimeTracker.set_wifi_state({	"state": false }, function(r) {
 			console.log(r);
 		}, function(e) {
 			console.log(e);
 		});
 	}
 	function turnWifiOn(){
-		window.plugins.WifiListener.set_wifi_state({	"state": true }, function(r) {
+		DGPTimeTracker.set_wifi_state({	"state": true }, function(r) {
 			console.log(r);
 		}, function(e) {
 			console.log(e);
@@ -90,7 +92,7 @@
 	
 	//timelog functions
 	function getLog() {
-		window.plugins.WifiListener.get_log("", function(r) {
+		DGPTimeTracker.get_log("", function(r) {
 			successLog(r)
 		}, function(e) {
 			console.log(e)
@@ -113,7 +115,7 @@
 	}
 	function getAutoStatus(){
 		var projectID =  document.getElementById('projectIDAuto').value;
-		window.plugins.WifiListener.getShouldAutoUpdateProjectEvents({	"fid": projectID }, 
+		DGPTimeTracker.getShouldAutoUpdateProjectEvents({	"fid": projectID }, 
 			function(r) {
 			console.log(r);
 				if (r) {
@@ -125,7 +127,7 @@
 		}, function(e) {
 			console.log(e)
 		});
-// 		window.plugins.WifiListener.getShouldAutoUpdateProjectEvents({	"fid": projectID }, function(r) {
+// 		DGPTimeTracker.getShouldAutoUpdateProjectEvents({	"fid": projectID }, function(r) {
 // 			alert( "auto is " + r);
 // 			console.log("auto is " + r);
 // 			var form = document.getElementById('getAuto');
@@ -145,7 +147,7 @@
 		var projectID =  document.getElementById('projectIDAuto').value;
 		var autoUpdate = document.getElementById('inputID').checked;
 		alert(" setting for project " + projectID + "  with auto of  " + autoUpdate);
-		window.plugins.WifiListener.setShouldAutoUpdateProjectEvents({	"fid": projectID, "shouldautoupdate":autoUpdate }, 
+		DGPTimeTracker.setShouldAutoUpdateProjectEvents({	"fid": projectID, "shouldautoupdate":autoUpdate }, 
 				function(r) {
 					alert("set with " + r);
 			}, function(e) {

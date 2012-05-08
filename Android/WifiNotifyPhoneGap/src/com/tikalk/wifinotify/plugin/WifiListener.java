@@ -51,11 +51,11 @@ public class WifiListener extends Plugin {
 	//get all active wifi spots
 	public static final String ACTION_GET_ACTIVE = "get_active";
 	//set point for tracking
-	public static final String ACTION_SET_POINT = "set_point";
+	public static final String ACTION_SET_POINT = "addProject";
 	//confirm to login to a place
-	public static final String ACTION_LOGIN = "login";
+	public static final String ACTION_CHECKIN = "checkinToProject";
 	//confirm to logout of a place
-	public static final String ACTION_LOGOUT = "logout";
+	public static final String ACTION_CHECKOUT = "checkoutOfProject";
 	//requests the details for the notificaiton click
 	public static final String ACTION_GET_NOTIFY_DETAILS = "get_notify_details";
 	//requests the formatted log for logins and logouts
@@ -72,6 +72,9 @@ public class WifiListener extends Plugin {
 	//KEY CONSTANTS
 	public static final String KEY_PROJECT_ID = "fid";
 	public static final String KEY_SHOULD_UPDATE_BOOL = "shouldautoupdate";
+	public static final String KEY_LATITUDE = "latitude";
+	public static final String KEY_LONGITUDE = "longitude";
+	public static final String KEY_PROJECT_NAME = "projectname";
 
 	@Override
 	public PluginResult execute(String action, JSONArray data, String callBackID) {
@@ -149,11 +152,11 @@ public class WifiListener extends Plugin {
 			return(new PluginResult(Status.OK,jsonListArray));
 
 		}
-		else if(action.matches(ACTION_LOGIN)){
+		else if(action.matches(ACTION_CHECKIN)){
 			db.close();
 			return log(true, data, context);
 		}
-		else if(action.matches(ACTION_LOGOUT)){
+		else if(action.matches(ACTION_CHECKOUT)){
 			db.close();
 			return log(false, data, context);
 		}
@@ -168,10 +171,10 @@ public class WifiListener extends Plugin {
 			String longitude = "";
 			//grab hotspot info from json
 			try {
-				name = data.getJSONObject(0).getString("projectname");
-				id = data.getJSONObject(0).getString("projectid");
-				latitude =  data.getJSONObject(0).getString("latitude");
-				longitude =  data.getJSONObject(0).getString("longitude");
+				name = data.getJSONObject(0).getString(KEY_PROJECT_NAME);
+				id = data.getJSONObject(0).getString(KEY_PROJECT_ID);
+				latitude =  data.getJSONObject(0).getString(KEY_LATITUDE);
+				longitude =  data.getJSONObject(0).getString(KEY_LONGITUDE);
 
 			}catch (JSONException e) {
 				Log.d(TAG, "error setting new point:" + e.getMessage());

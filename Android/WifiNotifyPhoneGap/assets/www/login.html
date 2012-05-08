@@ -33,9 +33,9 @@
 	}
 	function log(){
 		if(loggingIn)
-			window.plugins.WifiListener.login({"project_id": projectID }, successLog, function(e){errorLog(e)});
+			DGPTimeTracker.checkinToProject({"project_id": projectID }, successLog, function(e){errorLog(e)});
 		else
-			window.plugins.WifiListener.logout({"project_id": projectID }, successLog, function(e){errorLog(e)});
+			DGPTimeTracker.checkoutOfProject({"project_id": projectID }, successLog, function(e){errorLog(e)});
 	}
 	function successLog(){
 		setTimeout( function() {navigator.app.exitApp();}, 100 );
