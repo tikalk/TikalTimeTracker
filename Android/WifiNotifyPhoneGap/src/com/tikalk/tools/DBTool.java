@@ -29,8 +29,8 @@ public class DBTool extends SQLiteOpenHelper {
 	public static final String KEY_PROJECT_ID = "project_id";//TEXT
 	//a unique int for sending notifications
 	public static final String KEY_PROJECT_NOTIFY_ID = "notify_id";//INT
-	//ssid of a hotspot
-	public static final String KEY_SSID = "ssid";//TEXT
+	//bssid of a hotspot
+	public static final String KEY_BSSID = "bssid";//TEXT
 	//longitude for a project
 	public static final String KEY_LONGITUDE = "long";//TEXT
 	//latitude for a project
@@ -50,7 +50,7 @@ public class DBTool extends SQLiteOpenHelper {
 
 	public static final String HOTSPOT_TABLE_CREATE =
 			"CREATE TABLE " + TABLE_SPOTS + " (" +
-					KEY_PROJECT_ID + " TEXT, " + KEY_SSID + " TEXT, " +
+					KEY_PROJECT_ID + " TEXT, " + KEY_BSSID + " TEXT, " +
 					KEY_PROJECT_NAME + " TEXT, "   + KEY_LATITUDE + " TEXT, " + KEY_LONGITUDE + " TEXT);";
 
 	public static final String TIMESTAMP_TABLE_CREATE =
@@ -96,7 +96,7 @@ public class DBTool extends SQLiteOpenHelper {
 	//access functions
 
 	// Adding new spot
-	public boolean addPoint(String id, String SSID, String projectName, String longitude, String latitude) {
+	public boolean addPoint(String id, String bSSID, String projectName, String longitude, String latitude) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		//make sure project doesn't already exist
 		if(existsProject(id))
@@ -105,7 +105,7 @@ public class DBTool extends SQLiteOpenHelper {
 		//create project argument
 		ContentValues values = new ContentValues();
 		values.put(KEY_PROJECT_ID, id); //id for spot
-		values.put(KEY_SSID, SSID);// SSID for checkin spot
+		values.put(KEY_BSSID, bSSID);// SSID for checkin spot
 		values.put(KEY_PROJECT_NAME, projectName); // name of this checkin spot
 		values.put(KEY_LONGITUDE, longitude); // location data
 		values.put(KEY_LATITUDE, latitude);  // location data
@@ -177,13 +177,13 @@ public class DBTool extends SQLiteOpenHelper {
 		return pairs;
 	}
 	//get location
-	//get id for ssid
-	public Location getLocation(String SSID) {
+	//get id for bssid
+	public Location getLocation(String bSSID, String projectID) {
 		SQLiteDatabase db = this.getReadableDatabase();
 
 		Cursor cursor = db.query(TABLE_SPOTS, new String[] { 
-				KEY_SSID, KEY_LONGITUDE, KEY_LATITUDE}, KEY_SSID + "=?",
-				new String[] { SSID}, null, null, null, null);
+				KEY_BSSID, KEY_LONGITUDE, KEY_LATITUDE}, KEY_BSSID + "=? AND " + KEY_PROJECT_ID + " =?",
+				new String[] { bSSID, projectID}, null, null, null, null);
 		Location pairs = new Location("dummy");
 		if (cursor != null && cursor.moveToFirst()){
 			pairs.setLatitude(Double.valueOf(cursor.getString(2)));
@@ -260,7 +260,7 @@ public class DBTool extends SQLiteOpenHelper {
 
 		return(rowsAffected >= 1);
 	}
-	private String getProjectNameFromID(String projectID) {
+	public String getProjectNameFromID(String projectID) {
 		SQLiteDatabase db = this.getReadableDatabase();
 
 		Cursor cursor = db.query(TABLE_PROJECTS, new String[] { 
@@ -299,14 +299,14 @@ public class DBTool extends SQLiteOpenHelper {
 		Cursor cursor = db.query(TABLE_PROJECTS, new String[] { 
 				KEY_PROJECT_ID, KEY_LOGGED_IN}, KEY_LOGGED_IN + " = " + BOOL_TRUE,
 				new String[] {}, null, null, null, null);
-		String ssid = "";
+		String bssid = "";
 		if (cursor != null && cursor.getCount()  >= 1){
 			cursor.moveToFirst();
-			ssid = cursor.getString(0);
+			bssid = cursor.getString(0);
 		}
 		cursor.close();
 		cursor = null;
-		return ssid;
+		return bssid;
 	}
 
 
@@ -314,7 +314,7 @@ public class DBTool extends SQLiteOpenHelper {
 	public List<String> getAllSpots() {
 		List<String> spotsList = new ArrayList<String>();
 		// Select All Query
-		String selectQuery = "SELECT " + KEY_SSID + " FROM " + TABLE_SPOTS;
+		String selectQuery = "SELECT " + KEY_BSSID + " FROM " + TABLE_SPOTS;
 
 		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.rawQuery(selectQuery, null);
@@ -334,7 +334,7 @@ public class DBTool extends SQLiteOpenHelper {
 	public List<String> getAllSpots(String projectID) {
 		List<String> spotsList = new ArrayList<String>();
 		// Select All Query
-		String selectQuery = "SELECT " + KEY_SSID + " FROM " + TABLE_SPOTS + " WHERE "
+		String selectQuery = "SELECT " + KEY_BSSID + " FROM " + TABLE_SPOTS + " WHERE "
 				+ KEY_PROJECT_ID + " = \'" + projectID + "\'";
 
 		SQLiteDatabase db = this.getReadableDatabase();
@@ -372,9 +372,9 @@ public class DBTool extends SQLiteOpenHelper {
 		return spotsList;
 	}
 	//checks if the waypoint exists
-	public boolean existsSSID(String SSID){
+	public boolean existsBSSID(String bSSID){
 		// Select All Query
-		String selectQuery = "SELECT * FROM " + TABLE_SPOTS + " WHERE " + KEY_SSID + " = \'" + SSID + "\'";
+		String selectQuery = "SELECT * FROM " + TABLE_SPOTS + " WHERE " + KEY_BSSID + " = \'" + bSSID + "\'";
 
 		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor;
@@ -418,21 +418,22 @@ public class DBTool extends SQLiteOpenHelper {
 		db.delete(TABLE_SPOTS, null, null);
 		db.delete(TABLE_TIMES, null, null);
 	}
-
-	public String getProjectName(String ssid) {
+	//returns all projectids with associated bssid with the 
+	public List<String> getProjectIDsForBSSID(String bssid) {
+		List<String> projecIDs = new ArrayList<String>();
 		SQLiteDatabase db = this.getReadableDatabase();
 
 		Cursor cursor = db.query(TABLE_SPOTS, new String[] { 
-				KEY_PROJECT_NAME, KEY_SSID}, KEY_SSID + " = " + "\'" +  ssid + "\'",
-				new String[] {}, null, null, null, null);
-		String projectName = "";
-		if (cursor != null && cursor.getCount()  >= 1){
-			cursor.moveToFirst();
-			projectName = cursor.getString(0);
+				KEY_PROJECT_ID}, KEY_BSSID + " = ?",
+				new String[] {bssid}, null, null, null, null);
+		if (cursor.moveToFirst()) {
+			do {
+				projecIDs.add(cursor.getString(0));
+			} while (cursor.moveToNext());
 		}
 		cursor.close();
 		cursor = null;
-		return projectName;
+		return projecIDs;
 	}
 
 

@@ -49,8 +49,8 @@ public class Shared {
 		return mProjectID;
 	}
 
-	public static void setNotifyClick(String ssid, boolean loggingIn, String projectID) {
-		mProjectName = ssid;
+	public static void setNotifyClick(String projectName, boolean loggingIn, String projectID) {
+		mProjectName = projectName;
 		mLoggingIn = loggingIn;
 		mProjectID = projectID;
 	}

@@ -29,7 +29,7 @@ public class WifiNotifyPhoneGapActivity extends DroidGap {
         		(db.loggedInProject().matches("") || !extras.getBoolean(Defined.KEY_LOGGING_IN))
         		){
         	super.loadUrl("file:///android_asset/www/login.html");
-        	//set the ssid and boolean variables to shared resource
+        	//set the bssid and boolean variables to shared resource
         	String projectName = extras.getString(Defined.KEY_PROJECT_NAME);
         	boolean loggingIn = extras.getBoolean(Defined.KEY_LOGGING_IN);
         	String projectID = extras.getString(Defined.KEY_PROJECT_ID);

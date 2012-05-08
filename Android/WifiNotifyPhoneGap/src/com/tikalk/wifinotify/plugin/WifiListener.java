@@ -27,6 +27,14 @@ import com.tikalk.wifilistener.LocationSingleUpdateBroadcastReceiver;
 import com.tikalk.wifilistener.WifiListenerService;
 import com.tikalk.wifilistener.WifiListenerService.LocalBinder;
 
+
+/**
+ * NOTE ABOUT MULTIPLE CHECKIN
+ * THIS PLUGGIN ASSUMES ONLY ONE PROJECT CAN BE CHECKED IN IN AT A TIME
+ * IF THERE IS A REQUEST TO CHECKIN A PROJECT(PROJB) AND ANOTHER PROJECT(PROJA)
+ * IS ALREADY CHECKED IN THEN THE REQUEST WILL FAIL AND THE ORIGIONAL PROJECT(PROJA) 
+ * WILL REMAIN CHECKED IN
+ */
 public class WifiListener extends Plugin {
 	/**
 	 * CONSTANTS
@@ -125,11 +133,11 @@ public class WifiListener extends Plugin {
 			int size = list.size();
 			for(int i=0; i< size; i++){
 				JSONObject newPoint = new JSONObject();
-				String ssid = list.get(i);
+				String bssid = list.get(i);
 				try {
-					newPoint.put(Defined.KEY_PROJECT_NAME, ssid);
-					newPoint.put(Defined.KEY_EXISTS, db.existsSSID(ssid));
-					newPoint.put(Defined.KEY_LOGGED_IN, db.isLoggedIn(ssid));
+					newPoint.put(Defined.KEY_PROJECT_NAME, bssid);
+					newPoint.put(Defined.KEY_EXISTS, db.existsBSSID(bssid));
+					newPoint.put(Defined.KEY_LOGGED_IN, db.isLoggedIn(bssid));
 				} catch (JSONException e) {
 					db.close();
 					return new PluginResult(Status.ERROR, getJsonObjectError(e));
@@ -150,7 +158,7 @@ public class WifiListener extends Plugin {
 			return log(false, data, context);
 		}
 		else if(action.matches(ACTION_SET_POINT)){
-			//grab all the local ssids and add to database with given info
+			//grab all the local bssids and add to database with given info
 			List<String> current = Shared.getCurrentSpots();
 			int size = current.size();
 			//init json data variables
@@ -172,17 +180,17 @@ public class WifiListener extends Plugin {
 			//boolean for if add passes or fails (if not spots then false)
 			boolean addPassed = size > 0;
 			for(int i=0; i < size; i++){
-				String ssid = current.get(i);
+				String bssid = current.get(i);
 
 				//String ssid = data.getJSONObject(0).getString("ssid");
 
 
-				if(ssid.matches(""))
+				if(bssid.matches(""))
 					return new PluginResult(Status.ERROR, getJsonObjectError(new JSONException("no ssid")));
 				/*//add hotspot to queue
 				Shared.queueAddEvent(new PendingEvent(ssid, PendingEvent.EVENT_ADD_POINT));	
 				LocationSingleUpdateBroadcastReceiver.startSingleUpdate(context);*/
-				addPassed &= db.addPoint(id, ssid, name, longitude, latitude);
+				addPassed &= db.addPoint(id, bssid, name, longitude, latitude);
 
 			}
 			//only add project to project db if all previous adds passed
@@ -296,8 +304,9 @@ public class WifiListener extends Plugin {
 			DBTool db = new DBTool(context);
 			//set new login status
 			boolean success = db.setLoggedIn(login, projectID);
-			//log new status in tracker
-			success &= db.setLoggedInTimestamp(login, projectID);
+			//login passes new status in tracker
+			if(success)
+				db.setLoggedInTimestamp(true, projectID);
 			db.close();
 			if(success)
 				return new PluginResult(Status.OK);

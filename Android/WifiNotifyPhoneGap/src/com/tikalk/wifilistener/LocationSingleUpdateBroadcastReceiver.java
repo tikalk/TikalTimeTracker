@@ -20,6 +20,13 @@ import com.tikalk.tools.Defined;
 import com.tikalk.tools.PendingEvent;
 import com.tikalk.tools.Shared;
 
+/**
+ * NOTE ABOUT MULTIPLE CHECKIN
+ * THIS PLUGGIN ASSUMES ONLY ONE PROJECT CAN BE CHECKED IN IN AT A TIME
+ * IF THERE IS A REQUEST TO CHECKIN A PROJECT(PROJB) AND ANOTHER PROJECT(PROJA)
+ * IS ALREADY CHECKED IN THEN THE REQUEST WILL FAIL AND THE ORIGIONAL PROJECT(PROJA) 
+ * WILL REMAIN CHECKED IN
+ */
 public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {	
 	/**
 	 * CONSTANTS
@@ -60,28 +67,28 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 				PendingEvent pending = Shared.queueGetNext();
 				/*if(pending.getType() == PendingEvent.EVENT_ADD_POINT)
 	    			addSpot(pending.getSSID(), location);
-	    		else*/ if(pending.getType() == PendingEvent.EVENT_VERIFY_LOGIN_SPOT){
-	    			verifyLogin(pending.getSSID(), location, context);
+	    		else*/ if(pending.getType() == PendingEvent.EVENT_VERIFY_LOGIN){
+	    			verifyLogin(pending, location, context);
 	    		}
-	    		else if(pending.getType() == PendingEvent.EVENT_LOGOUT){
-	    			verifyLogout(pending.getSSID(), location, context);
+	    		else if(pending.getType() == PendingEvent.EVENT_VERIFY_LOGOUT){
+	    			verifyLogout(pending, location, context);
 	    		}
 			}
 		}
 		mDB.close();
 	}
 	//verify user is logging into correct location
-	private void verifyLogin(String ssid, Location verifyLoc, Context context) {
+	private void verifyLogin(PendingEvent pending, Location verifyLoc, Context context) {
 		//verify that spot is within a certain distance if so then post notification
-		Location origLoc = mDB.getLocation(ssid);
+		Location origLoc = mDB.getLocation(pending.getBSSID(), pending.getProjectID());
 		float dist = origLoc.distanceTo(verifyLoc);
 		if(dist < MAX_DIST){
-			String projectName = mDB.getProjectName(ssid);
+			String projectID = pending.getProjectID();
+			String projectName = mDB.getProjectNameFromID(projectID);
 
-			String projectID = mDB.getID(projectName);
 			//if project is set for auto-update then login/logout
 			if(mDB.getAutoUpdate(projectID)){
-				//if loggin in passes, then log timestamp
+				//if login  passes, then log timestamp
 				if(mDB.setLoggedIn(true, projectID))
 					mDB.setLoggedInTimestamp(true, projectID);
 			}else{
@@ -92,15 +99,16 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 	}
 
 	//verify user is far enough away(MIN_DIST) to logout
-	private void verifyLogout(String ssid, Location verifyLoc, Context context) {
+	private void verifyLogout(PendingEvent pending, Location verifyLoc, Context context) {
 		//verify that spot is within a certain distance if so then post notification
-		Location origLoc = mDB.getLocation(ssid);
+		Location origLoc = mDB.getLocation(pending.getBSSID(), pending.getProjectID());
 		float dist = origLoc.distanceTo(verifyLoc);
 		if(dist > MIN_DIST){
-			String projectName = mDB.getProjectName(ssid);
+			String projectID = pending.getProjectID();
+			String projectName = mDB.getProjectNameFromID(projectID);
 
 			//if project is set for auto-update then login/logout
-			String projectID = mDB.getID(projectName);
+			
 			if(mDB.getAutoUpdate(projectID)){
 				//if loggin in passes, then log timestamp
 				if(mDB.setLoggedIn(false, projectID))

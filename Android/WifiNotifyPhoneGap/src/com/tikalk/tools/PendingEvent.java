@@ -7,22 +7,27 @@ public class PendingEvent {
 	 * CONSTANTS
 	 */
 //	public static final int EVENT_ADD_POINT = 0;
-	public static final int EVENT_VERIFY_LOGIN_SPOT = 1;
-	public static final int EVENT_LOGOUT = 2;
+	public static final int EVENT_VERIFY_LOGIN = 1;
+	public static final int EVENT_VERIFY_LOGOUT = 2;
 	
 	/**
 	 * MEMBERS
 	 */
-	private String mSsid;
+	//bssid of hotspot
+	private String mBssid;
+	//id of project
+	private String mProjectID;
+	//type of event (login or logout)
 	private int mType;
 	
 	/**
 	 * METHODS
 	 */
 	//constructor
-	public PendingEvent(String ssid, int eventType){
+	public PendingEvent(String bssid, String projectID, int eventType){
 		mType = eventType;
-		mSsid = ssid;
+		mBssid = bssid;
+		mProjectID = projectID;
 	}
 
 	
@@ -31,8 +36,12 @@ public class PendingEvent {
 		return mType;
 	}
 	
-	public String getSSID(){
-		return mSsid;
+	public String getBSSID(){
+		return mBssid;
+	}
+	
+	public String getProjectID(){
+		return mProjectID;
 	}
 	
 	
