@@ -49,7 +49,9 @@
 	function onDeviceReady()
 	{
 		//fsclient = new FourSquareClient(fsAPI_KEY, fsAPI_SECRET, "", true);
-		startAndroidService()
+		if(device.platform == "Android"){
+			startAndroidService();
+		}
 	}
 	
 	//only called on Android devices convert back button to service start stop button
