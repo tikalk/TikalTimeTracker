@@ -137,8 +137,8 @@ public class DBTool extends SQLiteOpenHelper {
 	//removes project and all references to it in the table_spots
 	public boolean removeProject(String id){
 		SQLiteDatabase db = this.getWritableDatabase();
-		int projectDelete = db.delete(TABLE_PROJECTS, KEY_PROJECT_ID + "=" + id, null);
-		int spotsDelete = db.delete(TABLE_SPOTS, KEY_PROJECT_ID + "=" + id, null);
+		int projectDelete = db.delete(TABLE_PROJECTS, KEY_PROJECT_ID + " = ?", new String[]{id});
+		int spotsDelete = db.delete(TABLE_SPOTS, KEY_PROJECT_ID + " = ?" ,new String[]{ id});
 		return(projectDelete>0 && spotsDelete > 0);
 	}
 

@@ -68,6 +68,8 @@ public class WifiListener extends Plugin {
 	public static final String ACTION_GET_SHOULD_AUTO_UPDATE = "getShouldAutoUpdateProjectEvents";
 	//set project notification state
 	public static final String ACTION_SET_SHOULD_AUTO_UPDATE = "setShouldAutoUpdateProjectEvents";
+	//remove a project from 
+	public static final String ACTION_REMOVE_PROJECT = "removeProject";
 
 	//KEY CONSTANTS
 	public static final String KEY_PROJECT_ID = "fid";
@@ -281,6 +283,24 @@ public class WifiListener extends Plugin {
 			boolean boolResult = db.setAutoUpdate(shouldAuto, projectID);
 			db.close();
 			return new PluginResult(Status.OK,boolResult);
+		}
+		else if(action.matches(ACTION_REMOVE_PROJECT)){
+			String projectID = "";
+			
+			try {
+				projectID = data.getJSONObject(0).getString(KEY_PROJECT_ID);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(db.removeProject(projectID)){
+				db.close();
+				return new PluginResult(Status.OK);
+			}
+			else{
+				db.close();
+				return new PluginResult(Status.ERROR, "Failed to remove");
+			}
 		}
 
 
