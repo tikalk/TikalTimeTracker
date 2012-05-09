@@ -51,7 +51,7 @@ public class WifiListener extends Plugin {
 	//get all active wifi spots
 	public static final String ACTION_GET_ACTIVE = "get_active";
 	//set point for tracking
-	public static final String ACTION_SET_POINT = "addProject";
+	public static final String ACTION_ADD_PROJECT = "addProject";
 	//confirm to login to a place
 	public static final String ACTION_CHECKIN = "checkinToProject";
 	//confirm to logout of a place
@@ -72,6 +72,7 @@ public class WifiListener extends Plugin {
 	//KEY CONSTANTS
 	public static final String KEY_PROJECT_ID = "fid";
 	public static final String KEY_SHOULD_UPDATE_BOOL = "shouldautoupdate";
+	public static final String KEY_CURRENTLY_HERE_BOOL = "currentlyhere";
 	public static final String KEY_LATITUDE = "latitude";
 	public static final String KEY_LONGITUDE = "longitude";
 	public static final String KEY_PROJECT_NAME = "projectname";
@@ -160,7 +161,7 @@ public class WifiListener extends Plugin {
 			db.close();
 			return log(false, data, context);
 		}
-		else if(action.matches(ACTION_SET_POINT)){
+		else if(action.matches(ACTION_ADD_PROJECT)){
 			//grab all the local bssids and add to database with given info
 			List<String> current = Shared.getCurrentSpots();
 			int size = current.size();
@@ -253,15 +254,18 @@ public class WifiListener extends Plugin {
 		}
 		else if(action.matches(ACTION_GET_SHOULD_AUTO_UPDATE)){
 			String projectID;
+			JSONObject retVal = new JSONObject();
 			try {
 				projectID = data.getJSONObject(0).getString(KEY_PROJECT_ID);
+				retVal.put(KEY_SHOULD_UPDATE_BOOL, db.getAutoUpdate(projectID));
+				retVal.put(KEY_CURRENTLY_HERE_BOOL, db.isLoggedIn(projectID));
 			} catch (JSONException e) {
 				db.close();
 				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
 			}
-			boolean shouldAuto = db.getAutoUpdate(projectID);
+			
 			db.close();
-			return new PluginResult(Status.OK,shouldAuto);
+			return new PluginResult(Status.OK,retVal);
 		}
 		else if(action.matches(ACTION_SET_SHOULD_AUTO_UPDATE)){
 			String projectID;
@@ -300,7 +304,7 @@ public class WifiListener extends Plugin {
 
 	private PluginResult log(boolean login, JSONArray data, Context context){
 		try {
-			String projectID = data.getJSONObject(0).getString("project_id");
+			String projectID = data.getJSONObject(0).getString(KEY_PROJECT_ID);
 			if(projectID.matches(""))
 				return new PluginResult(Status.ERROR);
 			//grab database

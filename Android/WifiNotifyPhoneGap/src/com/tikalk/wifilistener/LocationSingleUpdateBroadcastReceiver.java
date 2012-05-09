@@ -14,6 +14,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.tikalk.tools.DBTool;
 import com.tikalk.tools.Defined;
@@ -89,8 +90,10 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 			//if project is set for auto-update then login/logout
 			if(mDB.getAutoUpdate(projectID)){
 				//if login  passes, then log timestamp
-				if(mDB.setLoggedIn(true, projectID))
+				if(mDB.setLoggedIn(true, projectID)){
 					mDB.setLoggedInTimestamp(true, projectID);
+					Toast.makeText(context, "You just auto-logged into " + projectName, Toast.LENGTH_LONG).show();
+					}
 			}else{
 				int id = mDB.getNotificationID(projectName);
 				addNotification(true, projectName, id, context);
@@ -111,8 +114,11 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 			
 			if(mDB.getAutoUpdate(projectID)){
 				//if loggin in passes, then log timestamp
-				if(mDB.setLoggedIn(false, projectID))
+				if(mDB.setLoggedIn(false, projectID)){
 					mDB.setLoggedInTimestamp(false, projectID);
+					//toast user that they just logged out
+					Toast.makeText(context, "You just auto-logged out of " + projectName, Toast.LENGTH_LONG).show();
+				}
 			}else{
 				int id = mDB.getNotificationID(projectName);
 				addNotification(false, projectName, id, context);
@@ -215,7 +221,8 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		List<String> allProviders = locationManager.getAllProviders();
 		for(int i=0; i < allProviders.size();i++){
 			Log.d("location test", "provider " + i + ": " + allProviders.get(i));
-
+			//set listener
+			locationManager.requestSingleUpdate(allProviders.get(i), singleUpatePI);
 		}
 		Log.d("location test", "enabled...");
 		allProviders = locationManager.getProviders(true);
@@ -223,10 +230,5 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 			Log.d("location test", "enabled provider " + i + ": " + allProviders.get(i));
 
 		}
-
-		//set listener
-		locationManager.requestSingleUpdate("network", singleUpatePI);
-
 	}
-
 }

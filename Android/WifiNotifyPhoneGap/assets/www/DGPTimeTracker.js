@@ -16,7 +16,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'start',								
 					[data]);
 		},
@@ -32,7 +32,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'stop',								
 					[data]);
 		},
@@ -48,7 +48,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'service_running',								
 					[data]);
 		},
@@ -64,7 +64,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'get_active',								
 					[data]);
 		},
@@ -101,7 +101,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'addProject',								
 					[data]);
 		},
@@ -118,7 +118,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'get_notify_details',								
 					[data]);
 		},
@@ -134,7 +134,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'login',								
 					[data]);
 		},
@@ -150,7 +150,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'logout',								
 					[data]);
 		},
@@ -166,7 +166,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'get_log',								
 					[data]);
 		},
@@ -182,7 +182,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'get_wifi_state',								
 					[data]);
 		},
@@ -198,7 +198,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'set_wifi_state',								
 					[data]);
 		},
@@ -214,7 +214,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'getShouldAutoUpdateProjectEvents',								
 					[data]);
 		},
@@ -230,7 +230,7 @@ var DGPTimeTracker = {
 			return PhoneGap.exec(
 					successCallback,			 
 					failureCallback,						
-					'WifiListener',				
+					'DGPTimeTracker',				
 					'setShouldAutoUpdateProjectEvents',								
 					[data]);
 		},
