@@ -329,7 +329,7 @@
         NSLog(@"Error deleting - error:%@",dberror1);
     }
     
-    [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have checked in to %@.", nil), project.name]];
+    //[self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have checked in to %@.", nil), project.name]];
 }
 
 - (void) forceCheckoutFromAllProjects {
@@ -382,7 +382,7 @@
         NSLog(@"Error deleting - error:%@",dberror1);
     }
     
-    [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have checked out of %@.", nil), project.name]];
+    //[self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have checked out of %@.", nil), project.name]];
 }
 
 - (void)returnTimeTrackerError: (NSUInteger) errorCode withMessage: (NSString*) message
@@ -426,9 +426,9 @@
     
     if (project.shouldAutoUpdate) {
         [self doCheckIn:project.fid];
-    }
-    
-    [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have arrived at %@.", nil), project.name]];
+    } else {
+        [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have arrived at %@.", nil), project.name]];
+    }    
 }
 
 - (void) locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region
@@ -455,9 +455,9 @@
     
     if (project.shouldAutoUpdate) {
         [self doCheckOut:project.fid];
-    } 
-    
-    [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have left %@.", nil), project.name]];
+    } else {
+       [self postLocalNotificationWithMessage:[NSString stringWithFormat:NSLocalizedString(@"You have left %@.", nil), project.name]]; 
+    }    
 }
 
 - (void)locationManager:(CLLocationManager *)manager monitoringDidFailForRegion:(CLRegion *)region withError:(NSError *)error {

@@ -49,6 +49,25 @@
 	function onDeviceReady()
 	{
 		//fsclient = new FourSquareClient(fsAPI_KEY, fsAPI_SECRET, "", true);
+		if(device.platform == "Android"){
+
+	        startAndroidService();
+
+	    }
+	}
+	
+	//only called on Android devices convert back button to service start stop button
+
+	function startAndroidService(){
+		DGPTimeTracker.start(
+			"",
+			function(result) { 
+				console.log("plugin in pass");
+			},
+			function(error) {
+				console.log("plugin in fail");
+			}
+		);
 	}
         
 	function doSelectLocation(id) {
