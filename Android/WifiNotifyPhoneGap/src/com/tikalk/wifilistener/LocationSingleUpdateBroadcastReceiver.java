@@ -2,7 +2,6 @@ package com.tikalk.wifilistener;
 
 import java.util.List;
 
-import android.R;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -20,6 +19,7 @@ import com.tikalk.tools.DBTool;
 import com.tikalk.tools.Defined;
 import com.tikalk.tools.PendingEvent;
 import com.tikalk.tools.Shared;
+import com.tikalk.wifinotify.R;
 
 /**
  * NOTE ABOUT MULTIPLE CHECKIN
@@ -39,7 +39,8 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 	public static final float MAX_DIST = 500.0f;
 	//constant for min distance for a logout if user is less than that distance away won't perform logout
 	public static final float MIN_DIST = 30.0f;
-
+	//string for intent filter on phonegap app
+	public static final String INTENT_FILTER_STRING = "com.tikal.location.tracker";
 	//KEYS FOR BUNDLE
 	//value that lets the phonegap activity know that it is being called form a notification
 	public static final String KEY_CALLER = "caller";
@@ -158,19 +159,18 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		String loginString1 = "", loginString2 = "";
 		String title = "";
 		if(loggingIn){
-			loginString1 = "You are near ";
-			loginString2 = " click to login";
-			title = "login";
+			loginString1 = "Checkin to ";
+			loginString2 = "?";
+			title = "Checkin";
 		}
 		else{
-			loginString1 = "You have left ";
-			loginString2 = " click to logout";
-			title = "logout";
+			loginString1 = "Checkout of ";
+			loginString2 = "?";
+			title = "Checkout";
 		}
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(ns);
-
-		int icon = R.drawable.btn_star;
+		int icon = R.drawable.notification_icon;
 		CharSequence tickerText = loginString1 + projectName + loginString2;
 		long when = System.currentTimeMillis();
 
@@ -178,8 +178,7 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 
 		CharSequence contentTitle = title;
 		CharSequence contentText = loginString1 + projectName + loginString2;
-		Intent notificationIntent = new Intent();
-		notificationIntent.setClassName(Defined.INTENT_PACKAGE, Defined.INTENT_ACTIVITY);
+		Intent notificationIntent = new Intent(INTENT_FILTER_STRING);
 		notificationIntent.putExtra(KEY_CALLER, "notification");
 		notificationIntent.putExtra(Defined.KEY_PROJECT_NAME, projectName);
 		notificationIntent.putExtra(Defined.KEY_LOGGING_IN, loggingIn);

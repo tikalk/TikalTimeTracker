@@ -3,10 +3,7 @@ package com.tikalk.tools;
  * Constants defined for multiple classes
  */
 public class Defined {
-	//intent details for notification EXACT SPELLING OR WILL NOT WORK
-	public static final String INTENT_PACKAGE = "com.tikal.time.tracker";
-	public static final String INTENT_ACTIVITY = "com.tikal.time.tracker.TikalTimeTrackerActivity";
-	
+
 	//key for project name
 	public static final String KEY_PROJECT_NAME = "project_name";
 	//boolean for if user is logging in or out (true = user loggin into location)

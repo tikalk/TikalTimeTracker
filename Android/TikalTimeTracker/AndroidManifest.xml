@@ -46,7 +46,8 @@
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name" >
             <intent-filter>
-                <action android:name="com.tikal.wifi.notify.notification" />
+                <action android:name="com.tikal.location.tracker" />
+                <category android:name="android.intent.category.DEFAULT" /> 
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
