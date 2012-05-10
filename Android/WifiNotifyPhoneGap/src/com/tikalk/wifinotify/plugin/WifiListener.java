@@ -78,6 +78,8 @@ public class WifiListener extends Plugin {
 	public static final String KEY_LATITUDE = "latitude";
 	public static final String KEY_LONGITUDE = "longitude";
 	public static final String KEY_PROJECT_NAME = "projectname";
+	public static final String KEY_TIMESTAMP = "timestamp";
+	public static final String KEY_LOGGED_IN_BOOL = "loggedinbool";
 
 	@Override
 	public PluginResult execute(String action, JSONArray data, String callBackID) {
@@ -219,16 +221,18 @@ public class WifiListener extends Plugin {
 		}
 
 		else if(action.matches(ACTION_GET_LOG)){
-
 			JSONObject retVal = new JSONObject();
-			try {
-				JSONArray logDetails = new JSONArray(db.getAllTimeStamps());
-				retVal.put(Defined.KEY_LOG_ARRAY, logDetails);
-			} catch (JSONException e) {
-				db.close();
-				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
-			}
+			JSONArray logDetails = db.getAllTimeStamps();
 			db.close();
+			//if failed then return error
+			if(logDetails == null){
+				return new PluginResult(Status.ERROR, "returned null from DB");
+			}
+			try {
+				retVal.put("log", logDetails);
+			} catch (JSONException e) {
+				return new PluginResult(Status.ERROR, e.getMessage());
+			}
 			return new PluginResult(Status.OK, retVal);
 		}
 		else if(action.matches(ACTION_GET_WIFI_STATE)){
@@ -333,7 +337,7 @@ public class WifiListener extends Plugin {
 			boolean success = db.setLoggedIn(login, projectID);
 			//login passes new status in tracker
 			if(success)
-				db.setLoggedInTimestamp(true, projectID);
+				db.setLoggedInTimestamp(login, projectID);
 			db.close();
 			if(success)
 				return new PluginResult(Status.OK);

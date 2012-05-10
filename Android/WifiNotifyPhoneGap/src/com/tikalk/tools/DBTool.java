@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.tikalk.wifilistener.WifiListenerService;
+import com.tikalk.wifinotify.plugin.WifiListener;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -18,7 +25,7 @@ public class DBTool extends SQLiteOpenHelper {
 	/**
 	 * CONSTANTS
 	 */
-	public static final int DATABASE_VERSION = 3;
+	public static final int DATABASE_VERSION = 4;
 	public static final String DATABASE_NAME = "wifi_notify";
 	public static final String TABLE_SPOTS = "wifi_spots";
 	public static final String TABLE_TIMES = "checkin_times";
@@ -221,7 +228,7 @@ public class DBTool extends SQLiteOpenHelper {
 		int rowsAffected = db.update(TABLE_PROJECTS, args, KEY_PROJECT_ID + " = \'" + projectID + "\'", null);
 
 		return(rowsAffected >= 1);
-		
+
 	}
 	//get the auto update value for a specific project
 	public boolean getAutoUpdate(String id){
@@ -239,7 +246,7 @@ public class DBTool extends SQLiteOpenHelper {
 		cursor = null;
 		return status == BOOL_TRUE;
 	}
-	
+
 	//add timestamp
 	public boolean setLoggedInTimestamp(boolean loggedIn, String projectID){
 		if(!existsProject(projectID))
@@ -253,7 +260,7 @@ public class DBTool extends SQLiteOpenHelper {
 		newTimestamp.put(KEY_PROJECT_NAME, getProjectNameFromID(projectID));
 		//get date
 		Date current = new Date(System.currentTimeMillis());
-		newTimestamp.put(KEY_TIMESTAMP, current.getDate() + ", " + current.getHours() + ":" + current.getMinutes());
+		newTimestamp.put(KEY_TIMESTAMP,"date:" +  current.getMonth() + "-" + current.getDate()  + "-" + (current.getYear() + 1900) + " time:" + current.getHours() + ":" + current.getMinutes() + ":" + current.getSeconds());
 		newTimestamp.put(KEY_LOGGED_IN, loggedInInt);
 		//insert new timestamp to table
 		rowsAffected += db.insert(TABLE_TIMES, null, newTimestamp);
@@ -352,8 +359,9 @@ public class DBTool extends SQLiteOpenHelper {
 	}
 
 	// Getting All timestamps
-	public List<String> getAllTimeStamps() {
-		List<String> spotsList = new ArrayList<String>();
+	public JSONArray getAllTimeStamps() {
+		JSONArray timeLogJSON = new JSONArray();
+
 		// Select All Query
 		String selectQuery = "SELECT " + KEY_PROJECT_NAME + ", " + KEY_TIMESTAMP +", " + KEY_LOGGED_IN + " " + "FROM " + TABLE_TIMES;
 
@@ -363,13 +371,26 @@ public class DBTool extends SQLiteOpenHelper {
 		// looping through all rows and adding to list
 		if (cursor.moveToFirst()) {
 			do {
-				String loggedIn = cursor.getInt(2) == BOOL_TRUE?"--logged in":"--logged out";
-				spotsList.add(cursor.getString(0) + ", " + cursor.getString(1) + ", "+ loggedIn);
+				try {
+					//String loggedIn = cursor.getInt(2) == BOOL_TRUE?"--logged in":"--logged out";
+					//create a json object with all of the items
+					JSONObject tempObject = new JSONObject();
+					tempObject.put(WifiListener.KEY_PROJECT_NAME, cursor.getString(0));
+					tempObject.put(WifiListener.KEY_TIMESTAMP, cursor.getString(1));
+					tempObject.put(WifiListener.KEY_LOGGED_IN_BOOL, cursor.getInt(2)==BOOL_TRUE);
+					
+					timeLogJSON.put(tempObject);
+				} catch (JSONException e) {
+					// uh oh errors return null
+					return null;
+				}
+
+				//spotsList.add(cursor.getString(0) + ", " + cursor.getString(1) + ", "+ loggedIn);
 			} while (cursor.moveToNext());
 		}
 		cursor.close();
 		// return contact list
-		return spotsList;
+		return timeLogJSON;
 	}
 	//checks if the waypoint exists
 	public boolean existsBSSID(String bSSID){
