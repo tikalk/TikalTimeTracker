@@ -8,6 +8,23 @@
 var DGPTimeTracker = {
 		
 		/**
+		 * returns the formatted log of loggins and logouts
+		 * 
+		 * @param data				Currently no data is needed, may be utilized in future editions
+		 * @param successCallback	The success callback
+		 * @param failureCallback	The error callback
+		 */
+		get_log: function(data, successCallback, failureCallback) {
+			return PhoneGap.exec(
+					successCallback,			 
+					failureCallback,						
+					'DGPTimeTracker',				
+					'get_log',								
+					[data]);
+		},
+
+		
+		/**
 		 * Initialize Wifi listening
 		 * 
 		 * @param data				Currently no data is needed, may be utilized in future editions

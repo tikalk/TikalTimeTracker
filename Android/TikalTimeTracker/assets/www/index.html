@@ -1,37 +1,46 @@
-<strong><!DOCTYPE html>
-<html>
-  <head>
-  <title></title>
-  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
-	<meta charset="utf-8">
-	
-	<!-- iPad/iPhone specific css below, add after your main css >
+<strong>
+	<!DOCTYPE html>
+	<html>
+<head>
+<title></title>
+
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+<meta charset="utf-8">
+
+<!-- iPad/iPhone specific css below, add after your main css >
 	<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
 	<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
 	-->
-	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
-	
-	<link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.1.0.min.css" />
-	<link rel="stylesheet" href="mapapp.css" type="text/css">
-	
-	<script type="text/javascript" charset="utf-8" src="cordova-1.6.0.js"></script>
-	<script src="js/jquery.js"></script>
-	<script src="js/jquery.mobile-1.1.0.min.js"></script>  
-	<script src="js/jquery.tmpl.min.js"></script>  
-	<script src="js/jquery.json-2.3.min.js" type="text/javascript"></script>
-	<script src="js/foursquare-js-api.js" type="text/javascript"></script>
-	<script src="js/jqm.page.params.js" type="text/javascript"></script>
-	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
-	<script type="text/javascript" src="lib/ui/min/jquery.ui.map.full.min.js"></script>
-	<script type="text/javascript" src="lib/ui/min/jquery.ui.map.services.min.js"></script>
-	<script type="text/javascript" src="lib/persistencejs/persistence.js"></script>
-	<script type="text/javascript" src="lib/persistencejs/persistence.store.sql.js"></script>
-	<script type="text/javascript" src="lib/persistencejs/persistence.store.websql.js"></script>
-	<script type="text/javascript" charset="utf-8" src="lib/globals.js"></script>
-	<script type="text/javascript" charset="utf-8" src="lib/DGPTimeTracker.js"></script>
-	
-	<script type="text/javascript">
+<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
+
+<link rel="stylesheet"
+	href="css/themes/default/jquery.mobile-1.1.0.min.css" />
+<link rel="stylesheet" href="mapapp.css" type="text/css">
+
+<script type="text/javascript" charset="utf-8" src="cordova-1.6.0.js"></script>
+<script src="js/jquery.js"></script>
+<script src="js/jquery.mobile-1.1.0.min.js"></script>
+<script src="js/jquery.tmpl.min.js"></script>
+<script src="js/jquery.json-2.3.min.js" type="text/javascript"></script>
+<script src="js/foursquare-js-api.js" type="text/javascript"></script>
+<script src="js/jqm.page.params.js" type="text/javascript"></script>
+<script type="text/javascript"
+	src="http://maps.google.com/maps/api/js?sensor=true"></script>
+<script type="text/javascript"
+	src="lib/ui/min/jquery.ui.map.full.min.js"></script>
+<script type="text/javascript"
+	src="lib/ui/min/jquery.ui.map.services.min.js"></script>
+<script type="text/javascript" src="lib/persistencejs/persistence.js"></script>
+<script type="text/javascript"
+	src="lib/persistencejs/persistence.store.sql.js"></script>
+<script type="text/javascript"
+	src="lib/persistencejs/persistence.store.websql.js"></script>
+<script type="text/javascript" charset="utf-8" src="lib/globals.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="lib/DGPTimeTracker.js"></script>
+
+<script type="text/javascript">
 	/* When this function is called, Cordova has been initialized and is ready to roll */
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
@@ -53,7 +62,39 @@
 			startAndroidService();
 		}
 	}
-	
+	//when user requests log
+	function openLog(){
+		DGPTimeTracker.get_log("", 
+			function(r){
+				/* alert("success");
+				for(var count = 0; count < r.log.length;count++){
+					var jsonObj = r.log[count];
+					console.log("item: " + jsonObj.projectname + " time " + jsonObj.timestamp + " logged in " + jsonObj.loggedinbool);
+				 } */
+				 //alert(nearbyLocations);
+				 
+				$.mobile.changePage("#timelog");
+				$.mobile.hidePageLoadingMsg();	
+				var list = $( "#timelog" ).find( ".loglist" );
+				//Use template to create items & add to list
+				$( "#logItem" ).tmpl( r.log ).appendTo( list );
+				console.log("appended");
+				//Call the listview jQuery UI Widget after adding 
+				//items to the list allowing correct rendering
+				list.listview( "refresh" );  
+			
+		}, function(e) {
+			console.log(e)
+		});
+		$.mobile.changePage("#timelog");
+	}
+	//converts boolean to string checkedin or checkedout
+	function convertBool(boolVal){
+		if(boolVal)
+			return "Checkedin";
+		else
+			return "Checkedout";
+	}
 	//only called on Android devices convert back button to service start stop button
 	function startAndroidService(){
 		DGPTimeTracker.start(
@@ -319,18 +360,22 @@
     
     </script>
 
-  </head>
-  <body onload="onBodyLoad()">
+</head>
+<body onload="onBodyLoad()">
 
-      <div data-add-back-btn="true" data-role="page" id="mainPage">
-		<div data-role="header" data-position="fixed" data-theme="b"> 
-			<a onClick="retrieveLocations();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Add</a>
-			<span class="ui-title">My Projects</span>
+	<div data-add-back-btn="true" data-role="page" id="mainPage">
+		<div data-role="header" data-position="fixed" data-theme="b">
+			<a onClick="retrieveLocations();" data-icon="plus"
+				data-iconpos="right" class="ui-btn-right" data-theme="c">Add</a> <a
+				onClick="openLog();" data-icon="grid" data-iconpos="left"
+				class="ui-btn-left" data-theme="c">Log</a> <span class="ui-title">My
+				Projects</span>
 		</div>
-          <ul class="lstMyProjects" data-role="listview" data-split-icon="gear" data-split-theme="d">
-		  </ul>
+		<ul class="lstMyProjects" data-role="listview" data-split-icon="gear"
+			data-split-theme="d">
+		</ul>
 
-            <script id="projectItem" type="text/x-jquery-tmpl">
+		<script id="projectItem" type="text/x-jquery-tmpl">
                 <li>
                 <a onclick="showMapForLocation('${fid}');">
                 <h3>${name}</h3>
@@ -339,47 +384,44 @@
                 <a onclick="doShowProjectOptions('${fid}');">${name}</a>
                 </li> 
             </script>
-      </div>
+	</div>
 
-      <div data-add-back-btn="true" data-role="page" id="projectOptions">
-		<div data-role="header" data-position="fixed" data-theme="b"> 
+	<div data-add-back-btn="true" data-role="page" id="projectOptions">
+		<div data-role="header" data-position="fixed" data-theme="b">
 			<span class="ui-title"></span>
 		</div>
 		<div data-role="content">
-            <a id="btnCheckin" data-role="button" data-transition="fade" data-theme="a" data-icon="check" data-iconpos="left" onclick="toggleCheckin();">
-                Check In
-            </a>
-            <div data-role="fieldcontain">
-                    <fieldset data-role="controlgroup">
-                        <label for="notifyState">
-                            Auto Update: 
-                        </label>
-                        <select name="notifyState" id="notifyState" data-theme="b" data-role="slider" onchange="toggleShouldAutoUpdate();">
-                            <option value="off">
-                                Off
-                            </option>
-                            <option value="on">
-                                On
-                            </option>
-                        </select>
-                    </fieldset>
-                </div>
-            <a onclick="deleteProject();" data-role="button" data-transition="fade" data-theme="e" data-icon="delete" data-iconpos="left">
-                Delete
-            </a>
-        </div>
-      </div>
+			<a id="btnCheckin" data-role="button" data-transition="fade"
+				data-theme="a" data-icon="check" data-iconpos="left"
+				onclick="toggleCheckin();"> Check In </a>
+			<div data-role="fieldcontain">
+				<fieldset data-role="controlgroup">
+					<label for="notifyState"> Auto Update: </label> <select
+						name="notifyState" id="notifyState" data-theme="b"
+						data-role="slider" onchange="toggleShouldAutoUpdate();">
+						<option value="off">Off</option>
+						<option value="on">On</option>
+					</select>
+				</fieldset>
+			</div>
+			<a onclick="deleteProject();" data-role="button"
+				data-transition="fade" data-theme="e" data-icon="delete"
+				data-iconpos="left"> Delete </a>
+		</div>
+	</div>
 
-      <div data-add-back-btn="true" data-role="page" id="selectlocation">
-          <div data-role="header" data-position="fixed" data-theme="b">
-			<a onClick="retrieveLocations();" data-icon="refresh" data-iconpos="right" class="ui-btn-right" data-theme="c">Refresh</a>
-              <span class="ui-title">Select Location</span>
-          </div>
-          <div data-role="content">
-              <ul class="locationlist" data-role="listview" data-split-icon="plus" data-split-theme="d">
+	<div data-add-back-btn="true" data-role="page" id="selectlocation">
+		<div data-role="header" data-position="fixed" data-theme="b">
+			<a onClick="retrieveLocations();" data-icon="refresh"
+				data-iconpos="right" class="ui-btn-right" data-theme="c">Refresh</a>
+			<span class="ui-title">Select Location</span>
+		</div>
+		<div data-role="content">
+			<ul class="locationlist" data-role="listview" data-split-icon="plus"
+				data-split-theme="d">
 
-			  </ul>
-              	<script id="locationItem" type="text/x-jquery-tmpl">
+			</ul>
+			<script id="locationItem" type="text/x-jquery-tmpl">
                   <li>
                   <a onclick="showMapForLocation('${id}');">
                   <h3>${name}</h3>
@@ -387,23 +429,44 @@
                   </a>
                   <a onclick="doSelectLocation('${id}');">${name}</a>
                   </li> 
-              	</script> 
-          </div>
-      </div>
+              	</script>
+		</div>
+	</div>
+	<div data-add-back-btn="true" data-role="page" id="timelog">
+		<div data-role="header" data-position="fixed" data-theme="b">
+			<span class="ui-title">Event Log</span>
+		</div>
+		<div data-role="content">
+			<ul class="loglist" data-role="listview" data-split-icon="plus"
+				data-split-theme="d">
 
-      <div data-role="page" data-theme="b" id="map_page" class="page-map" data-add-back-btn="true" style="width:100%; height:100%;"> 
-          <script type="text/javascript">
+			</ul>
+			<script id="logItem" type="text/x-jquery-tmpl">
+                  <li>
+                  <h3>${projectname}</h3>
+				  <p>${timestamp}</p>
+				  <p>${convertBool(loggedinbool)}</p>
+                  </li> 
+              	</script>
+		</div>
+	</div>
+
+	<div data-role="page" data-theme="b" id="map_page" class="page-map"
+		data-add-back-btn="true" style="width: 100%; height: 100%;">
+		<script type="text/javascript">
 
               </script>
-          <div data-role="header" data-position="fixed" data-theme="b">
-              <a onClick="doAddLocation();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Save</a>
-              <span class="ui-title">View On Map</span>
-          </div>
-          <div data-role="content" style="width:100%; height:100%; padding:0;">
-              <div id="map_canvas" style="width:100%; height:100%;"></div>
-          </div>
-      </div>
+		<div data-role="header" data-position="fixed" data-theme="b">
+			<a onClick="doAddLocation();" data-icon="plus" data-iconpos="right"
+				class="ui-btn-right" data-theme="c">Save</a> <span class="ui-title">View
+				On Map</span>
+		</div>
+		<div data-role="content"
+			style="width: 100%; height: 100%; padding: 0;">
+			<div id="map_canvas" style="width: 100%; height: 100%;"></div>
+		</div>
+	</div>
 
-  </body>
-</html>
+</body>
+	</html>
 </strong>
