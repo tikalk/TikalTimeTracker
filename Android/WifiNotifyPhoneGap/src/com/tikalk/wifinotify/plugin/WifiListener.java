@@ -85,7 +85,7 @@ public class WifiListener extends Plugin {
 	public PluginResult execute(String action, JSONArray data, String callBackID) {
 		PluginResult result = null;
 		Context context = ctx.getApplicationContext();
-		//create dbtool incase of need
+		//create dbtool incase of need, and make sure to close before each return call
 		DBTool db = new DBTool(context);
 		if(action.matches(ACTION_START)){
 			//check if service is started
@@ -93,9 +93,11 @@ public class WifiListener extends Plugin {
 				//start service
 				Intent startServiceIntent = new Intent(context, WifiListenerService.class);
 				context.startService(startServiceIntent);
+				db.close();
 				//returns true since starting service
 				return (new PluginResult(Status.OK, true));
 			}
+			db.close();
 			//returns false because service already started
 			return (new PluginResult(Status.OK, false));
 
@@ -122,15 +124,18 @@ public class WifiListener extends Plugin {
 					}
 				}, Context.BIND_NOT_FOREGROUND);
 				//boolean serviceStoppedBool = context.stopService(stopServiceIntent);
+				db.close();
 				//returns true since starting service
 				return (new PluginResult(Status.OK, true));
 			}
+			db.close();
 			//returns false because service already stopped
 			return (new PluginResult(Status.OK, false));
 
 		}
 		else if(action.matches(ACTION_SERVICE_RUNNING)){
 			boolean running = WifiListenerService.isServiceRunning(ctx.getApplicationContext());
+			db.close();
 			return (new PluginResult(Status.OK, running));
 		}
 		else if(action.matches(ACTION_GET_ACTIVE)){
@@ -183,6 +188,7 @@ public class WifiListener extends Plugin {
 
 			}catch (JSONException e) {
 				Log.d(TAG, "error setting new point:" + e.getMessage());
+				db.close();
 				return new PluginResult(Status.ERROR, getJsonObjectError(e));
 			}
 			//boolean for if add passes or fails (if not spots then false)
@@ -193,8 +199,10 @@ public class WifiListener extends Plugin {
 				//String ssid = data.getJSONObject(0).getString("ssid");
 
 
-				if(bssid.matches(""))
+				if(bssid.matches("")){
+					db.close();
 					return new PluginResult(Status.ERROR, getJsonObjectError(new JSONException("no ssid")));
+				}
 				/*//add hotspot to queue
 				Shared.queueAddEvent(new PendingEvent(ssid, PendingEvent.EVENT_ADD_POINT));	
 				LocationSingleUpdateBroadcastReceiver.startSingleUpdate(context);*/
@@ -214,6 +222,7 @@ public class WifiListener extends Plugin {
 				retVal.put(Defined.KEY_LOGGING_IN, Shared.mLoggingIn);
 				retVal.put(Defined.KEY_PROJECT_ID, Shared.getProjectID());
 			} catch (JSONException e) {
+				db.close();
 				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
 			}
 			db.close();
@@ -226,13 +235,16 @@ public class WifiListener extends Plugin {
 			db.close();
 			//if failed then return error
 			if(logDetails == null){
+				db.close();
 				return new PluginResult(Status.ERROR, "returned null from DB");
 			}
 			try {
 				retVal.put("log", logDetails);
 			} catch (JSONException e) {
+				db.close();
 				return new PluginResult(Status.ERROR, e.getMessage());
 			}
+			db.close();
 			return new PluginResult(Status.OK, retVal);
 		}
 		else if(action.matches(ACTION_GET_WIFI_STATE)){
@@ -327,12 +339,14 @@ public class WifiListener extends Plugin {
 	}
 
 	private PluginResult log(boolean login, JSONArray data, Context context){
+		//grab database
+		DBTool db = new DBTool(context);
 		try {
 			String projectID = data.getJSONObject(0).getString(KEY_PROJECT_ID);
-			if(projectID.matches(""))
+			if(projectID.matches("")){
+				db.close();
 				return new PluginResult(Status.ERROR);
-			//grab database
-			DBTool db = new DBTool(context);
+			}
 			//set new login status
 			boolean success = db.setLoggedIn(login, projectID);
 			//login passes new status in tracker
@@ -345,9 +359,9 @@ public class WifiListener extends Plugin {
 				return new PluginResult(Status.ERROR);
 
 		} catch (JSONException e) {
-			Log.d(TAG, "error setting point:" + e.getMessage());
+			Log.d(TAG, "error logging:" + e.getMessage());
+			db.close();
 			return new PluginResult(Status.ERROR);
 		}
 	}
-
 }

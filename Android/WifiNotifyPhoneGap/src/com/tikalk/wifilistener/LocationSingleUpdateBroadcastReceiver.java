@@ -20,7 +20,6 @@ import com.tikalk.tools.Defined;
 import com.tikalk.tools.PendingEvent;
 import com.tikalk.tools.Shared;
 import com.tikalk.wifinotify.R;
-
 /**
  * NOTE ABOUT MULTIPLE CHECKIN
  * THIS PLUGGIN ASSUMES ONLY ONE PROJECT CAN BE CHECKED IN IN AT A TIME
@@ -55,7 +54,14 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		Shared.mRequestingLocation = false;;
 		Log.d("location test", "Location update fired");
-		context.unregisterReceiver(this);
+		//added bceause a previous call could have already unregistered the reciever
+		try{
+			context.unregisterReceiver(this);
+		}
+		catch(IllegalArgumentException il){
+			//sometimes update can be called twice in proseession so already removed receiver
+
+		}
 		//grab database
 		mDB = new DBTool(context);
 
@@ -94,7 +100,7 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 				if(mDB.setLoggedIn(true, projectID)){
 					mDB.setLoggedInTimestamp(true, projectID);
 					Toast.makeText(context, "You just auto-logged into " + projectName, Toast.LENGTH_LONG).show();
-					}
+				}
 			}else{
 				int id = mDB.getNotificationID(projectName);
 				addNotification(true, projectName, id, context);
@@ -112,7 +118,7 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 			String projectName = mDB.getProjectNameFromID(projectID);
 
 			//if project is set for auto-update then login/logout
-			
+
 			if(mDB.getAutoUpdate(projectID)){
 				//if loggin in passes, then log timestamp
 				if(mDB.setLoggedIn(false, projectID)){
@@ -124,7 +130,6 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 				int id = mDB.getNotificationID(projectName);
 				addNotification(false, projectName, id, context);
 			}
-
 		}
 	}
 	//
