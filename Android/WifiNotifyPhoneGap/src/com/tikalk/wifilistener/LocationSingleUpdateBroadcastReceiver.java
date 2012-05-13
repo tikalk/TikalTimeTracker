@@ -2,6 +2,7 @@ package com.tikalk.wifilistener;
 
 import java.util.List;
 
+import android.R;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -19,7 +20,6 @@ import com.tikalk.tools.DBTool;
 import com.tikalk.tools.Defined;
 import com.tikalk.tools.PendingEvent;
 import com.tikalk.tools.Shared;
-import com.tikalk.wifinotify.R;
 /**
  * NOTE ABOUT MULTIPLE CHECKIN
  * THIS PLUGGIN ASSUMES ONLY ONE PROJECT CAN BE CHECKED IN IN AT A TIME
@@ -175,7 +175,7 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		}
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(ns);
-		int icon = R.drawable.notification_icon;
+		int icon = R.drawable.ic_dialog_info;
 		CharSequence tickerText = loginString1 + projectName + loginString2;
 		long when = System.currentTimeMillis();
 
