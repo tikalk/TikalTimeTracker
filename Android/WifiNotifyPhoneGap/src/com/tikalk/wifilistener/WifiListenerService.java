@@ -103,7 +103,7 @@ public class WifiListenerService extends Service {
     	int flag=(enabled ?
     	            PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
     	            PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
-    	ComponentName component=new ComponentName("com.tikalk.wifinotify", BootBroadcastReceiver.class.getName());
+    	ComponentName component=new ComponentName(getPackageName(), BootBroadcastReceiver.class.getName());
     	int setting = getPackageManager().getComponentEnabledSetting(component);
     	try {
 			ActivityInfo recInfo =  getPackageManager().getReceiverInfo(component, 0);
