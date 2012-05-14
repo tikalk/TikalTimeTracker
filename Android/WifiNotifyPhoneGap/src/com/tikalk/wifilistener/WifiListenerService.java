@@ -8,9 +8,13 @@ import com.tikalk.tools.DBTool;
 import android.app.ActivityManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
@@ -30,8 +34,6 @@ public class WifiListenerService extends Service {
 	 */
 	//broadcast receiver for wifi changes
 	BroadcastReceiver mWifiChanges;
-	//broadcast receiver for boot completed
-	BroadcastReceiver mBootCompleted;
 	// This is the object that receives interactions from clients.  See
     // RemoteService for a more complete example.
     private final IBinder mBinder = new LocalBinder();
@@ -50,11 +52,8 @@ public class WifiListenerService extends Service {
 		registerReceiver(mWifiChanges, scansAvailable);
 		IntentFilter wifiChange = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
 		registerReceiver(mWifiChanges, wifiChange);
-		
-		Log.d(TAG, "adding boot broadcast receiver");
-		IntentFilter bootFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-		mBootCompleted = new BootBroadcastReceiver();
-		registerReceiver(mBootCompleted, bootFilter);
+		//toggle the component on
+		setBootReceiver(true);
 		
 		return START_STICKY;
 	}
@@ -79,7 +78,7 @@ public class WifiListenerService extends Service {
 	//when destroyed make sure to remove all of the intent listners
 	public void unregisterRecievers(){
 		Log.d("registerReciever", "unregistering");
-		unregisterReceiver(mBootCompleted);
+		setBootReceiver(false);
 		unregisterReceiver(mWifiChanges);
 	}
 
@@ -97,5 +96,26 @@ public class WifiListenerService extends Service {
     	public WifiListenerService getService() {
             return WifiListenerService.this;
         }
+    }
+    
+    private void setBootReceiver(boolean enabled){
+    	Log.d(TAG, "toggling boot broadcast reciever " + enabled);
+    	int flag=(enabled ?
+    	            PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
+    	            PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+    	ComponentName component=new ComponentName("com.tikalk.wifinotify", BootBroadcastReceiver.class.getName());
+    	int setting = getPackageManager().getComponentEnabledSetting(component);
+    	try {
+			ActivityInfo recInfo =  getPackageManager().getReceiverInfo(component, 0);
+			Log.d(TAG, "reciever info is " + recInfo.packageName + ", " + recInfo.toString());
+		} catch (NameNotFoundException e) {
+			Log.d(TAG, "failed to get receiver info");
+		}
+    	Log.d(TAG, "setting is " + setting + " before set");
+    	getPackageManager()
+    	    .setComponentEnabledSetting(component, flag,
+    	                                PackageManager.DONT_KILL_APP);
+    	setting = getPackageManager().getComponentEnabledSetting(component);
+    	Log.d(TAG, "setting is " + setting + " after set");
     }
 }

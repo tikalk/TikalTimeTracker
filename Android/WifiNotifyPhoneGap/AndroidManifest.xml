@@ -37,7 +37,12 @@
         android:configChanges="orientation|keyboardHidden"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
-        <receiver android:name="com.tikalk.wifilistener.BootBroadcastReceiver" >
+        <receiver android:name="com.tikalk.wifilistener.BootBroadcastReceiver"
+            android:enabled="false"
+             >
+            <intent-filter>
+    			<action android:name="android.intent.action.BOOT_COMPLETED"/>
+   			</intent-filter>
         </receiver>
         <service android:name="com.tikalk.wifilistener.WifiListenerService" >
         </service>
