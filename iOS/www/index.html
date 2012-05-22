@@ -12,12 +12,12 @@
 	-->
 	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
 	
-	<link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.1.0.min.css" />
+	<link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.1.0.css" />
 	<link rel="stylesheet" href="mapapp.css" type="text/css">
 	
 	<script type="text/javascript" charset="utf-8" src="cordova-1.6.0.js"></script>
 	<script src="js/jquery.js"></script>
-	<script src="js/jquery.mobile-1.1.0.min.js"></script>  
+	<script src="js/jquery.mobile-1.1.0.min.js"></script>
 	<script src="js/jquery.tmpl.min.js"></script>  
 	<script src="js/jquery.json-2.3.min.js" type="text/javascript"></script>
 	<script src="js/foursquare-js-api.js" type="text/javascript"></script>
@@ -36,8 +36,8 @@
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
 	for more details -jm */
-	function onBodyLoad() { 
-		document.addEventListener("deviceready", onDeviceReady, false); 
+	function onBodyLoad() {
+        $(document).bind("deviceready", onDeviceReady, false);
 		// do your thing!
 		fsclient = new FourSquareClient(fsAPI_KEY, fsAPI_SECRET, "", true);
 	}
@@ -76,16 +76,16 @@
 		var projectsJSONString = "";
 		var boolProjectExists = false;
 		projects.list(null, function (results) {
-		    results.forEach(function (projectentityitem) {
-		        if(id == projectentityitem.fid) {
-					$.mobile.changePage("#mainPage");
-					boolProjectExists = true;
-				}
-		    });
+            $(results).each(function(index, item){
+                if (id == item.fid) {
+                    $.mobile.changePage("#mainPage");
+                    boolProjectExists = true;
+                }
+            });
 			if(!boolProjectExists) {
-				jQuery.each(nearbyLocations, function() {
-					if( id == this.id) {
-						currentLocation = this;
+                $(nearbyLocations).each(function(index, item){
+					if( id == item.id) {
+						currentLocation = item;
 						displayCurrentLocation(currentLocation);
 	                	doAddLocation();
 						return;
@@ -122,9 +122,9 @@
 	}
         
 	function showMapForLocation(id) {
-		jQuery.each(nearbyLocations, function() {
-			if( id == this.id) {
-				currentLocation = this;
+        $(nearbyLocations).each(function(index, item){
+			if( id == item.id) {
+				currentLocation = item;
 				$.mobile.changePage("#map_page");
 				return;
 			}
@@ -132,7 +132,7 @@
 	}
 
 	function clearNearbyLocations() {
-		var list = $( "#selectlocation" ).find( ".locationlist" );
+		var list = $( "#selectlocation .locationlist" );
 	    //Empty current list
 	    list.empty();
 		//Call the listview jQuery UI Widget after adding 
@@ -243,6 +243,34 @@
 			);
 		});
 	}
+	
+	function getEventsForDate() {
+		$.mobile.showPageLoadingMsg();
+		var newdate = $('#mydate').val();
+		var dateVal = newdate.split("-");
+		var month = dateVal[1];
+		var year = dateVal[0];
+		var params = {"year": year, "month": month};
+        DGPTimeTracker.retrieveProjectEventsForDate(
+            params,
+			function(result) { 
+				var events = result; 
+				var list = $( "#eventsPage" ).find( ".lstMyEvents" );
+				//Empty current list
+		        list.empty();
+				//Use template to create items & add to list
+				$( "#eventItem" ).tmpl( events ).appendTo( list );
+				//Call the listview jQuery UI Widget after adding 
+				//items to the list allowing correct rendering
+				list.listview( "refresh" );
+				$.mobile.hidePageLoadingMsg();
+			},
+			function(error) {   
+				alert("Error: " + error);  
+				$.mobile.hidePageLoadingMsg();  
+			}
+		);
+	}
         
 	// onSuccess Callback
 	//   This method accepts a `Position` object, which contains
@@ -261,8 +289,8 @@
 				//alert(nearbyLocations);
 				$.mobile.changePage("#selectlocation");
 				clearNearbyLocations();
-				$.mobile.hidePageLoadingMsg();														
-                var list = $( "#selectlocation" ).find( ".locationlist" );
+				$.mobile.hidePageLoadingMsg();
+                var list = $("#selectlocation .locationlist");
 				//Use template to create items & add to list
 				$( "#locationItem" ).tmpl( nearbyLocations ).appendTo( list );
 				//Call the listview jQuery UI Widget after adding 
@@ -300,6 +328,7 @@
 
       <div data-add-back-btn="true" data-role="page" id="mainPage">
 		<div data-role="header" data-position="fixed" data-theme="b"> 
+			<a href="#eventsPage" data-icon="grid" data-iconpos="left" class="ui-btn-left" data-theme="c">Events</a>
 			<a onClick="retrieveLocations();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Add</a>
 			<span class="ui-title">My Projects</span>
 		</div>
@@ -315,6 +344,40 @@
                 <a onclick="doShowProjectOptions('${fid}');">${name}</a>
                 </li> 
             </script>
+      </div>
+
+	  <div data-add-back-btn="true" data-role="page" id="eventsPage">
+		<div data-role="header" data-position="fixed" data-theme="b"> 
+			<a onClick="retrieveLocations();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Send</a>
+			<span class="ui-title">Events</span>
+		</div>
+		
+		<div data-role="content">
+            <div data-role="fieldcontain">
+                    <fieldset data-role="controlgroup">
+                        <label for="mydate">Event Month and Year:</label>
+
+						<input name="mydate" id="mydate" type="date" data-role="datebox"
+						   data-options='{"mode": "slidebox", "dateFormat":"%Y-%m", "timeFormatOverride":12, "fieldsOrderOverride":["y","m"]}'>
+			            
+                    </fieldset>
+					<a onclick="getEventsForDate();" data-role="button" data-transition="fade" data-theme="c">
+		                Show Events
+		            </a>
+                </div>
+            	<ul class="lstMyEvents" data-role="listview" data-theme="d">
+				</ul>
+
+		            <script id="eventItem" type="text/x-jquery-tmpl">
+		                <li>
+		                <h3>Project: ${projectname}</h3>
+		                <p>Checkin: ${checkin}</p>
+						<p>Checkout: ${checkout}</p>
+		                </li> 
+		            </script>
+        </div>
+		
+          
       </div>
 
       <div data-add-back-btn="true" data-role="page" id="projectOptions">
