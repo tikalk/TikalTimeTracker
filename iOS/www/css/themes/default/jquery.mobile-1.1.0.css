@@ -1076,7 +1076,9 @@ div.ui-mobile-viewport { overflow-x: hidden; }
 .ui-mobile [data-role=page], .ui-mobile [data-role=dialog], .ui-page { top: 0; left: 0; width: 100%; min-height: 100%; position: absolute; display: none; border: 0; }
 .ui-mobile .ui-page-active { display: block; overflow: visible; }
 /* on ios4, setting focus on the page element causes flashing during transitions when there is an outline, so we turn off outlines */
-.ui-page { outline: none; }
+.ui-page {
+    outline: none;
+}
 /*orientations from js are available */
 @media screen and (orientation: portrait){
 .ui-mobile, .ui-mobile .ui-page { min-height: 420px; }
@@ -1102,7 +1104,7 @@ div.ui-mobile-viewport { overflow-x: hidden; }
 .ui-bar, .ui-body { position: relative; padding: .4em 15px;  overflow: hidden; display: block;  clear:both;  }
 .ui-bar { font-size: 16px; margin: 0; }
 .ui-bar h1, .ui-bar h2, .ui-bar h3, .ui-bar h4, .ui-bar h5, .ui-bar h6 { margin: 0; padding: 0; font-size: 16px; display: inline-block; }
-.ui-header, .ui-footer { position: relative; border-left-width: 0; border-right-width: 0; }
+.ui-header, .ui-footer { position: relative; border-left-width: 0; border-right-width: 0; height: 35px;}
 .ui-header .ui-btn-left,
 .ui-header .ui-btn-right,
 .ui-footer .ui-btn-left,
