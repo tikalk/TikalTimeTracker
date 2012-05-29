@@ -131,5 +131,18 @@ var DGPTimeTracker = {
 	*/
      checkoutOfProject: function(params, success, fail) {
           return PhoneGap.exec(success, fail, "DGPTimeTracker", "checkoutOfProject", [params]);
-     }
+     },
+     
+     /*
+ 	Params:
+ 	#define KEY_YEAR                            @"year"
+ 	#define KEY_MONTH                           @"month"
+     Returns array of
+     #define KEY_PROJECT_NAME                    @"projectname"
+     #define KEY_EVENT_CHECKIN                   @"checkin"
+     #define KEY_EVENT_CHECKOUT                  @"checkout"
+ 	*/
+      retrieveProjectEventsForDate: function(params, success, fail) {
+           return PhoneGap.exec(success, fail, "DGPTimeTracker", "retrieveProjectEventsForDate", [params]);
+      }
 };

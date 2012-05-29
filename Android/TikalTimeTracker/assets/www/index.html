@@ -1,5 +1,4 @@
-<strong>
-	<!DOCTYPE html>
+<strong> <!DOCTYPE html>
 	<html>
 <head>
 <title></title>
@@ -14,8 +13,7 @@
 	-->
 <!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
 
-<link rel="stylesheet"
-	href="css/themes/default/jquery.mobile-1.1.0.min.css" />
+<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.1.0.css" />
 <link rel="stylesheet" href="mapapp.css" type="text/css">
 
 <script type="text/javascript" charset="utf-8" src="cordova-1.6.0.js"></script>
@@ -40,12 +38,13 @@
 <script type="text/javascript" charset="utf-8"
 	src="lib/DGPTimeTracker.js"></script>
 
+
 <script type="text/javascript">
 	/* When this function is called, Cordova has been initialized and is ready to roll */
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
 	for more details -jm */
-	function onBodyLoad() { 
+	function onBodyLoad() {
 		document.addEventListener("deviceready", onDeviceReady, false); 
 		// do your thing!
 		fsclient = new FourSquareClient(fsAPI_KEY, fsAPI_SECRET, "", true);
@@ -59,78 +58,21 @@
 	{
 		//fsclient = new FourSquareClient(fsAPI_KEY, fsAPI_SECRET, "", true);
 		if(device.platform == "Android"){
-			startAndroidService();
-		}
+	        startAndroidService();
+	    }
 	}
-	//when user requests log
-	function openLog(){
-		DGPTimeTracker.get_log("", 
-			function(r){
-				/* alert("success");
-				for(var count = 0; count < r.log.length;count++){
-					var jsonObj = r.log[count];
-					console.log("item: " + jsonObj.projectname + " time " + jsonObj.timestamp + " logged in " + jsonObj.loggedinbool);
-				 } */
-				 //alert(nearbyLocations);
-				 
-				$.mobile.changePage("#timelog");
-				$.mobile.hidePageLoadingMsg();	
-				var list = $( "#timelog" ).find( ".loglist" );
-				//Use template to create items & add to list
-				$( "#logItem" ).tmpl( r.log ).appendTo( list );
-				console.log("appended");
-				//Call the listview jQuery UI Widget after adding 
-				//items to the list allowing correct rendering
-				list.listview( "refresh" );  
-			
-		}, function(e) {
-			console.log(e)
-		});
-		$.mobile.changePage("#timelog");
-	}
-	//converts boolean to string checkedin or checkedout
-	function convertBool(boolVal){
-		if(boolVal)
-			return "Checkedin";
-		else
-			return "Checkedout";
-	}
+	
 	//only called on Android devices convert back button to service start stop button
+
 	function startAndroidService(){
-		DGPTimeTracker.start(
-				"",
-				function(result) { 
-					console.log("plugin in pass");
-		      	},
-		      	function(error) {
-		      		console.log("plugin in fail");
-		      	}
-			);
-		/*console.log("in changing back button");
-		/* //TESTING for testing start service
 		DGPTimeTracker.start(
 			"",
 			function(result) { 
-				console.log("plugin in pass");
-	      	},
-	      	function(error) {
-	      		console.log("plugin in fail");
-	      	}
-		); */
-		
-		//TODO grab back button and change inner html and onclick action
-/* 		 console.log("backbunt value is " + $.mobile.page.prototype.options.addBackBtn);
-		$.mobile.page.prototype.options.addBackBtn = false;
-		 console.log("backbunt value is " + $.mobile.page.prototype.options.addBackBtn); */
-		 /* var backButton = document.getElementById('mainPage');
-		console.log("backbung is " + backButton);
-		var methods = [];
-		for(var obj in backButton.attributes){
-			methods.push( obj + ",");
-		}
-		console.log("methods are " + methods); */
-		/* <a onClick="toggleService();" data-icon="plus" data-iconpos="left" class="ui-btn-left" data-theme="c">Start</a>
-		 */
+			},
+			function(error) {
+				alert("Error: " + error);
+			}
+		);
 	}
         
 	function doSelectLocation(id) {
@@ -139,16 +81,16 @@
 		var projectsJSONString = "";
 		var boolProjectExists = false;
 		projects.list(null, function (results) {
-		    results.forEach(function (projectentityitem) {
-		        if(id == projectentityitem.fid) {
-					$.mobile.changePage("#mainPage");
-					boolProjectExists = true;
-				}
-		    });
+            $(results).each(function(index, item){
+                if (id == item.fid) {
+                    $.mobile.changePage("#mainPage");
+                    boolProjectExists = true;
+                }
+            });
 			if(!boolProjectExists) {
-				jQuery.each(nearbyLocations, function() {
-					if( id == this.id) {
-						currentLocation = this;
+                $(nearbyLocations).each(function(index, item){
+					if( id == item.id) {
+						currentLocation = item;
 						displayCurrentLocation(currentLocation);
 	                	doAddLocation();
 						return;
@@ -173,11 +115,9 @@
 		var params = {"fid": currentLocation.id, "projectname": currentLocation.name, "latitude": currentLocation.location.lat, "longitude": currentLocation.location.lng, "address": currentLocation.location.address};
 		DGPTimeTracker.addProject(
 			params,
-			function(result) { 
-				console.log("project added succsfully");
+			function(result) {     
 	      	},
-	      	function(error) {
-	      		console.log("project failed to add");
+	      	function(error) {     
 	      	}
 		);
         persistence.flush(function() {
@@ -187,9 +127,9 @@
 	}
         
 	function showMapForLocation(id) {
-		jQuery.each(nearbyLocations, function() {
-			if( id == this.id) {
-				currentLocation = this;
+        $(nearbyLocations).each(function(index, item){
+			if( id == item.id) {
+				currentLocation = item;
 				$.mobile.changePage("#map_page");
 				return;
 			}
@@ -197,7 +137,7 @@
 	}
 
 	function clearNearbyLocations() {
-		var list = $( "#selectlocation" ).find( ".locationlist" );
+		var list = $( "#selectlocation .locationlist" );
 	    //Empty current list
 	    list.empty();
 		//Call the listview jQuery UI Widget after adding 
@@ -308,6 +248,32 @@
 			);
 		});
 	}
+	
+	function getEventsForDate() {
+		$.mobile.showPageLoadingMsg();
+		var month = $('#month').val();
+		var year = $('#year').val();
+		var params = {"year": year, "month": month};
+        DGPTimeTracker.retrieveProjectEventsForDate(
+            params,
+			function(result) { 
+				var events = result; 
+				var list = $( "#eventsPage" ).find( ".lstMyEvents" );
+				//Empty current list
+		        list.empty();
+				//Use template to create items & add to list
+				$( "#eventItem" ).tmpl( events ).appendTo( list );
+				//Call the listview jQuery UI Widget after adding 
+				//items to the list allowing correct rendering
+				list.listview( "refresh" );
+				$.mobile.hidePageLoadingMsg();
+			},
+			function(error) {   
+				alert("Error: " + error);  
+				$.mobile.hidePageLoadingMsg();  
+			}
+		);
+	}
         
 	// onSuccess Callback
 	//   This method accepts a `Position` object, which contains
@@ -326,8 +292,8 @@
 				//alert(nearbyLocations);
 				$.mobile.changePage("#selectlocation");
 				clearNearbyLocations();
-				$.mobile.hidePageLoadingMsg();														
-                var list = $( "#selectlocation" ).find( ".locationlist" );
+				$.mobile.hidePageLoadingMsg();
+                var list = $("#selectlocation .locationlist");
 				//Use template to create items & add to list
 				$( "#locationItem" ).tmpl( nearbyLocations ).appendTo( list );
 				//Call the listview jQuery UI Widget after adding 
@@ -365,10 +331,10 @@
 
 	<div data-add-back-btn="true" data-role="page" id="mainPage">
 		<div data-role="header" data-position="fixed" data-theme="b">
-			<a onClick="retrieveLocations();" data-icon="plus"
-				data-iconpos="right" class="ui-btn-right" data-theme="c">Add</a> <a
-				onClick="openLog();" data-icon="grid" data-iconpos="left"
-				class="ui-btn-left" data-theme="c">Log</a> <span class="ui-title">My
+			<a href="#eventsPage" data-icon="grid" data-iconpos="left"
+				class="ui-btn-left" data-theme="c">Events</a> <a
+				onClick="retrieveLocations();" data-icon="plus" data-iconpos="right"
+				class="ui-btn-right" data-theme="c">Add</a> <span class="ui-title">My
 				Projects</span>
 		</div>
 		<ul class="lstMyProjects" data-role="listview" data-split-icon="gear"
@@ -384,6 +350,39 @@
                 <a onclick="doShowProjectOptions('${fid}');">${name}</a>
                 </li> 
             </script>
+	</div>
+
+	<div data-add-back-btn="true" data-role="page" id="eventsPage">
+		<div data-role="header" data-position="fixed" data-theme="b">
+			<a onClick="retrieveLocations();" data-icon="plus"
+				data-iconpos="right" class="ui-btn-right" data-theme="c">Send</a> <span
+				class="ui-title">Events</span>
+		</div>
+
+		<div data-role="content">
+			<div data-role="fieldcontain">
+				<fieldset data-role="controlgroup">
+					<label for="year">Year</label>
+					<input type="number" name="number" id="year" value="2012" class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c">
+					<label for="month">Month</label>
+					<input type="number" name="number" id="month" value="05" class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c">
+				</fieldset>
+				<a onclick="getEventsForDate();" data-role="button"
+					data-transition="fade" data-theme="c"> Show Events </a>
+			</div>
+			<ul class="lstMyEvents" data-role="listview" data-theme="d">
+			</ul>
+
+			<script id="eventItem" type="text/x-jquery-tmpl">
+		                <li>
+		                <h3>Project: ${projectname}</h3>
+		                <p>Checkin: ${checkin}</p>
+						<p>Checkout: ${checkout}</p>
+		                </li> 
+		            </script>
+		</div>
+
+
 	</div>
 
 	<div data-add-back-btn="true" data-role="page" id="projectOptions">
@@ -428,24 +427,6 @@
                   <p>${location.address}</p>
                   </a>
                   <a onclick="doSelectLocation('${id}');">${name}</a>
-                  </li> 
-              	</script>
-		</div>
-	</div>
-	<div data-add-back-btn="true" data-role="page" id="timelog">
-		<div data-role="header" data-position="fixed" data-theme="b">
-			<span class="ui-title">Event Log</span>
-		</div>
-		<div data-role="content">
-			<ul class="loglist" data-role="listview" data-split-icon="plus"
-				data-split-theme="d">
-
-			</ul>
-			<script id="logItem" type="text/x-jquery-tmpl">
-                  <li>
-                  <h3>${projectname}</h3>
-				  <p>${timestamp}</p>
-				  <p>${convertBool(loggedinbool)}</p>
                   </li> 
               	</script>
 		</div>
