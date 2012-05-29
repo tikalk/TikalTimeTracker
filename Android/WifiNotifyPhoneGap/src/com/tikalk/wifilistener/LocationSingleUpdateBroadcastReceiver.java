@@ -225,13 +225,14 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		List<String> allProviders = locationManager.getAllProviders();
 		for(int i=0; i < allProviders.size();i++){
 			Log.d("location test", "provider " + i + ": " + allProviders.get(i));
-			//set listener
-			locationManager.requestSingleUpdate(allProviders.get(i), singleUpatePI);
+
 		}
 		Log.d("location test", "enabled...");
 		allProviders = locationManager.getProviders(true);
 		for(int i=0; i < allProviders.size();i++){
 			Log.d("location test", "enabled provider " + i + ": " + allProviders.get(i));
+			//set listener
+			locationManager.requestSingleUpdate(allProviders.get(i), singleUpatePI);
 
 		}
 	}

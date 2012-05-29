@@ -59,7 +59,7 @@ public class WifiListener extends Plugin {
 	//requests the details for the notificaiton click
 	public static final String ACTION_GET_NOTIFY_DETAILS = "get_notify_details";
 	//requests the formatted log for logins and logouts
-	public static final String ACTION_GET_LOG = "get_log";
+	public static final String ACTION_RETRIEVE_EVENTS_FOR_DATE = "retrieveProjectEventsForDate";
 	//request for current wifi state
 	public static final String ACTION_GET_WIFI_STATE = "get_wifi_state";
 	//request to change wifi state
@@ -78,7 +78,14 @@ public class WifiListener extends Plugin {
 	public static final String KEY_LATITUDE = "latitude";
 	public static final String KEY_LONGITUDE = "longitude";
 	public static final String KEY_PROJECT_NAME = "projectname";
-	public static final String KEY_TIMESTAMP = "timestamp";
+
+	public static final String KEY_DATE_YEAR = "year";
+	public static final String KEY_DATE_MONTH = "month";
+	
+	//internal keys
+	public static final String KEY_TIMESTAMP_START = "checkin";
+	public static final String KEY_TIMESTAMP_STOP = "checkout";
+	
 	public static final String KEY_LOGGED_IN_BOOL = "loggedinbool";
 
 	@Override
@@ -229,23 +236,30 @@ public class WifiListener extends Plugin {
 			return new PluginResult(Status.OK, retVal);
 		}
 
-		else if(action.matches(ACTION_GET_LOG)){
-			JSONObject retVal = new JSONObject();
-			JSONArray logDetails = db.getAllTimeStamps();
+		else if(action.matches(ACTION_RETRIEVE_EVENTS_FOR_DATE)){
+			//grab month and year from the caller and pass to dbtool
+			int year, month;
+			try {
+				year = data.getJSONObject(0).getInt(KEY_DATE_YEAR);
+				month = data.getJSONObject(0).getInt(KEY_DATE_MONTH);
+			} catch (JSONException e) {
+				// invalid values
+				db.close();
+				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
+			}
+			//convert year to 1900=0 format and month to jan=0 format
+			year -= 1900;
+			month--;
+			JSONArray logDetails = db.getAllTimeStamps(year, month);
 			db.close();
 			//if failed then return error
 			if(logDetails == null){
 				db.close();
 				return new PluginResult(Status.ERROR, "returned null from DB");
 			}
-			try {
-				retVal.put("log", logDetails);
-			} catch (JSONException e) {
-				db.close();
-				return new PluginResult(Status.ERROR, e.getMessage());
-			}
+			
 			db.close();
-			return new PluginResult(Status.OK, retVal);
+			return new PluginResult(Status.OK, logDetails);
 		}
 		else if(action.matches(ACTION_GET_WIFI_STATE)){
 			WifiManager wMNG = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);

@@ -1,5 +1,6 @@
 package com.tikalk.tools;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,8 +47,10 @@ public class DBTool extends SQLiteOpenHelper {
 	public static final String KEY_PROJECT_NAME = "project_name";//TEXT
 	//int/boolen that declares if currently logged into a specific project
 	public static final String KEY_LOGGED_IN = "logged_in";//INT
-	//a timestamp for a login/logout event
-	public static final String KEY_TIMESTAMP = "timestamp";//TEXT
+	//a timestamp for when logging into a project, stored as mili since epoch
+	public static final String KEY_TIMESTAMP_START = "timestamp_start";//INT
+	//a timestamp for when logging out of project, stored as mili since epoch
+	public static final String KEY_TIMESTAMP_STOP = "timestamp_stop";//INT
 	//int/boolean that declares if the project is set up for auto updating
 	public static final String KEY_AUTO_UPDATE = "auto_update";//INT
 
@@ -63,7 +66,7 @@ public class DBTool extends SQLiteOpenHelper {
 	public static final String TIMESTAMP_TABLE_CREATE =
 			"CREATE TABLE " + TABLE_TIMES + " (" +
 					KEY_PROJECT_ID + " INT, " + KEY_PROJECT_NAME + " TEXT, " +
-					KEY_TIMESTAMP + " TEXT, " + KEY_LOGGED_IN + " INT);";
+					KEY_TIMESTAMP_START + " INT, " + KEY_TIMESTAMP_STOP + " INT);";
 
 	public static final String PROJECTS_TABLE_CREATE =
 			"CREATE TABLE " + TABLE_PROJECTS + " (" +
@@ -247,23 +250,36 @@ public class DBTool extends SQLiteOpenHelper {
 		return status == BOOL_TRUE;
 	}
 
-	//add timestamp
+	//add timestamp for logged in
 	public boolean setLoggedInTimestamp(boolean loggedIn, String projectID){
 		if(!existsProject(projectID))
 			return false;
 		int rowsAffected =0;
-		int loggedInInt = loggedIn?BOOL_TRUE:BOOL_FALSE;
 
 		SQLiteDatabase db = this.getWritableDatabase();
-		ContentValues newTimestamp = new ContentValues();
-		newTimestamp.put(KEY_PROJECT_ID, projectID);
-		newTimestamp.put(KEY_PROJECT_NAME, getProjectNameFromID(projectID));
-		//get date
-		Date current = new Date(System.currentTimeMillis());
-		newTimestamp.put(KEY_TIMESTAMP,"date:" +  current.getMonth() + "-" + current.getDate()  + "-" + (current.getYear() + 1900) + " time:" + current.getHours() + ":" + current.getMinutes() + ":" + current.getSeconds());
-		newTimestamp.put(KEY_LOGGED_IN, loggedInInt);
-		//insert new timestamp to table
-		rowsAffected += db.insert(TABLE_TIMES, null, newTimestamp);
+		//if logging in
+		if(loggedIn){
+			ContentValues newTimestamp = new ContentValues();
+			newTimestamp.put(KEY_PROJECT_ID, projectID);
+			newTimestamp.put(KEY_PROJECT_NAME, getProjectNameFromID(projectID));
+			//set start and end time to the the same time
+			long currentTime = System.currentTimeMillis();
+			newTimestamp.put(KEY_TIMESTAMP_START,currentTime);
+			newTimestamp.put(KEY_TIMESTAMP_STOP,currentTime);
+			//insert new timestamp to table
+			rowsAffected += db.insert(TABLE_TIMES, null, newTimestamp);
+		}
+		//if logging out
+		else{
+			//find and update where start = stop and id = given
+			ContentValues updateTimestamp = new ContentValues();
+			updateTimestamp.put(KEY_TIMESTAMP_STOP,Long.toString(System.currentTimeMillis()));
+			
+			rowsAffected += db.update(TABLE_TIMES, updateTimestamp, 
+					KEY_TIMESTAMP_START + "="  + KEY_TIMESTAMP_STOP + " AND " 
+					+ KEY_PROJECT_ID + "=?", new String[]{projectID});  
+			
+		}
 
 		return(rowsAffected >= 1);
 	}
@@ -358,15 +374,22 @@ public class DBTool extends SQLiteOpenHelper {
 		return spotsList;
 	}
 
-	// Getting All timestamps
-	public JSONArray getAllTimeStamps() {
+	// Getting All timestamps for a certain month in a certain year
+	public JSONArray getAllTimeStamps(int year, int month) {
+		Date startDate = new Date(year, month, 0);
+		long startTimeStamp = startDate.getTime();
+		Date endDate = new Date(year, month, 31);
+		long endTimeStamp = endDate.getTime();
 		JSONArray timeLogJSON = new JSONArray();
 
 		// Select All Query
-		String selectQuery = "SELECT " + KEY_PROJECT_NAME + ", " + KEY_TIMESTAMP +", " + KEY_LOGGED_IN + " " + "FROM " + TABLE_TIMES;
+		//String selectQuery = "SELECT " + KEY_PROJECT_NAME + ", " + KEY_TIMESTAMP_START +", " + KEY_TIMESTAMP_STOP + " " + "FROM " + TABLE_TIMES;
 
 		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cursor = db.rawQuery(selectQuery, null);
+		Cursor cursor = db.query(TABLE_TIMES, new String[]{KEY_PROJECT_NAME, KEY_TIMESTAMP_START, KEY_TIMESTAMP_STOP},
+								KEY_TIMESTAMP_START + " > ?" + " AND " + KEY_TIMESTAMP_START + " < ?",
+								new String[]{Long.toString(startTimeStamp), Long.toString(endTimeStamp)}
+								, null, null, KEY_TIMESTAMP_START);
 
 		// looping through all rows and adding to list
 		if (cursor.moveToFirst()) {
@@ -376,9 +399,12 @@ public class DBTool extends SQLiteOpenHelper {
 					//create a json object with all of the items
 					JSONObject tempObject = new JSONObject();
 					tempObject.put(WifiListener.KEY_PROJECT_NAME, cursor.getString(0));
-					tempObject.put(WifiListener.KEY_TIMESTAMP, cursor.getString(1));
-					tempObject.put(WifiListener.KEY_LOGGED_IN_BOOL, cursor.getInt(2)==BOOL_TRUE);
-					
+					//convert timestamps to strings
+					long tStart = cursor.getLong(1), tEnd = cursor.getLong(2);
+					SimpleDateFormat format = new SimpleDateFormat("MMM dd,yyyy  hh:mm");
+					tempObject.put(WifiListener.KEY_TIMESTAMP_START, format.format(new Date(tStart)));
+					tempObject.put(WifiListener.KEY_TIMESTAMP_STOP, format.format(new Date(tEnd)));
+
 					timeLogJSON.put(tempObject);
 				} catch (JSONException e) {
 					// uh oh errors return null
