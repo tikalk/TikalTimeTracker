@@ -45,61 +45,56 @@
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
 	for more details -jm */
 	function onBodyLoad() {
-		document.addEventListener("deviceready", onDeviceReady, false); 
+		document.addEventListener("deviceready", onDeviceReady, false);
 		// do your thing!
 		fsclient = new FourSquareClient(fsAPI_KEY, fsAPI_SECRET, "", true);
 	}
-	
+
 	/* When this function is called, PhoneGap has been initialized and is ready to roll */
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
 	for more details -jm */
-	function onDeviceReady()
-	{
+	function onDeviceReady() {
 		//fsclient = new FourSquareClient(fsAPI_KEY, fsAPI_SECRET, "", true);
-		if(device.platform == "Android"){
-	        startAndroidService();
-	    }
+		if (device.platform == "Android") {
+			startAndroidService();
+		}
 	}
-	
+
 	//only called on Android devices convert back button to service start stop button
 
-	function startAndroidService(){
-		DGPTimeTracker.start(
-			"",
-			function(result) { 
-			},
-			function(error) {
-				alert("Error: " + error);
-			}
-		);
+	function startAndroidService() {
+		DGPTimeTracker.start("", function(result) {
+		}, function(error) {
+			alert("Error: " + error);
+		});
 	}
-        
+
 	function doSelectLocation(id) {
 		// Check if project already exists
 		var projects = Project.all(); // Returns QueryCollection of all Projects in Database
 		var projectsJSONString = "";
 		var boolProjectExists = false;
-		projects.list(null, function (results) {
-            $(results).each(function(index, item){
-                if (id == item.fid) {
-                    $.mobile.changePage("#mainPage");
-                    boolProjectExists = true;
-                }
-            });
-			if(!boolProjectExists) {
-                $(nearbyLocations).each(function(index, item){
-					if( id == item.id) {
+		projects.list(null, function(results) {
+			$(results).each(function(index, item) {
+				if (id == item.fid) {
+					$.mobile.changePage("#mainPage");
+					boolProjectExists = true;
+				}
+			});
+			if (!boolProjectExists) {
+				$(nearbyLocations).each(function(index, item) {
+					if (id == item.id) {
 						currentLocation = item;
 						displayCurrentLocation(currentLocation);
-	                	doAddLocation();
+						doAddLocation();
 						return;
 					}
-				});	
+				});
 			}
 		});
 	}
-	
+
 	function doAddLocation() {
 		$.mobile.showPageLoadingMsg();
 		var project = new Project();
@@ -109,26 +104,28 @@
 		project.latitude = currentLocation.location.lat;
 		project.longitude = currentLocation.location.lng;
 		project.currentlyHere = false;
-        persistence.add(project);
+		persistence.add(project);
 
 		// Send Add to Native Code for Region Monitoring
-		var params = {"fid": currentLocation.id, "projectname": currentLocation.name, "latitude": currentLocation.location.lat, "longitude": currentLocation.location.lng, "address": currentLocation.location.address};
-		DGPTimeTracker.addProject(
-			params,
-			function(result) {     
-	      	},
-	      	function(error) {     
-	      	}
-		);
-        persistence.flush(function() {
-		  	$.mobile.changePage("#mainPage");	
+		var params = {
+			"fid" : currentLocation.id,
+			"projectname" : currentLocation.name,
+			"latitude" : currentLocation.location.lat,
+			"longitude" : currentLocation.location.lng,
+			"address" : currentLocation.location.address
+		};
+		DGPTimeTracker.addProject(params, function(result) {
+		}, function(error) {
+		});
+		persistence.flush(function() {
+			$.mobile.changePage("#mainPage");
 			$.mobile.hidePageLoadingMsg();
 		});
 	}
-        
+
 	function showMapForLocation(id) {
-        $(nearbyLocations).each(function(index, item){
-			if( id == item.id) {
+		$(nearbyLocations).each(function(index, item) {
+			if (id == item.id) {
 				currentLocation = item;
 				$.mobile.changePage("#map_page");
 				return;
@@ -137,184 +134,187 @@
 	}
 
 	function clearNearbyLocations() {
-		var list = $( "#selectlocation .locationlist" );
-	    //Empty current list
-	    list.empty();
+		var list = $("#selectlocation .locationlist");
+		//Empty current list
+		list.empty();
 		//Call the listview jQuery UI Widget after adding 
 		//items to the list allowing correct rendering
-		list.listview( "refresh" );
+		list.listview("refresh");
 	}
-        
+
 	function displayCurrentLocation(currentLocation) {
-		$( "#locationContainer" ).text("You have picked: " + currentLocation.name);
+		$("#locationContainer")
+				.text("You have picked: " + currentLocation.name);
 	}
-        
-	function doCheckIn() {}
-        
-	function retrieveLocations(){
+
+	function doCheckIn() {
+	}
+
+	function retrieveLocations() {
 		$.mobile.showPageLoadingMsg();
 		navigator.geolocation.getCurrentPosition(onSuccess, onError);
 	}
-	
+
 	function doShowProjectOptions(fid) {
 		$.mobile.changePage("#projectOptions?fid=" + fid);
 	}
-	
+
 	function deleteProject() {
-		
+
 		//MIKE TODO - Delete Project on your end as well;
-		
+
 		$.mobile.showPageLoadingMsg();
 		Project.findBy("fid", $.mobile.pageData.fid, function(project) {
-			
+
 			// Send Remove to Native Code for Region Monitoring
-			var params = {"fid": project.fid, "projectname": project.name, "latitude": project.latitude, "longitude": project.longitude};
-			DGPTimeTracker.removeProject(
-				params,
-				function(result) {     
-		      	},
-		      	function(error) {      
-		      	}
-			);
-			
+			var params = {
+				"fid" : project.fid,
+				"projectname" : project.name,
+				"latitude" : project.latitude,
+				"longitude" : project.longitude
+			};
+			DGPTimeTracker.removeProject(params, function(result) {
+			}, function(error) {
+			});
+
 			persistence.remove(project);
 			persistence.flush(function() {
-			  	$.mobile.changePage("#mainPage");	
+				$.mobile.changePage("#mainPage");
 				$.mobile.hidePageLoadingMsg();
 			});
 		});
 	}
-	
+
 	function toggleCheckin() {
 		$.mobile.showPageLoadingMsg();
-		var params = {"fid": $.mobile.pageData.fid};
-        DGPTimeTracker.getShouldAutoUpdateProjectEvents(
-            params,
-			function(result) {
-				var here = result.currentlyhere;
-				if(here) {
-				    //MIKE TODO - send check out update
-					var params = {"fid": $.mobile.pageData.fid};
-			        DGPTimeTracker.checkoutOfProject(
-			            params,
-						toggleCheckinSuccess,
-						toggleCheckinError
-					);
-				} else {
-				   // send check in update
-					var params = {"fid": $.mobile.pageData.fid};
-			        DGPTimeTracker.checkinToProject(
-			            params,
-						toggleCheckinSuccess,
-						toggleCheckinError
-					);
-				}
-			},
-			function(error) {   
-		        $.mobile.hidePageLoadingMsg();  
-			}
-		);
+		var params = {
+			"fid" : $.mobile.pageData.fid
+		};
+		DGPTimeTracker.getShouldAutoUpdateProjectEvents(params,
+				function(result) {
+					var here = result.currentlyhere;
+					if (here) {
+						//MIKE TODO - send check out update
+						var params = {
+							"fid" : $.mobile.pageData.fid
+						};
+						DGPTimeTracker.checkoutOfProject(params,
+								toggleCheckinSuccess, toggleCheckinError);
+					} else {
+						// send check in update
+						var params = {
+							"fid" : $.mobile.pageData.fid
+						};
+						DGPTimeTracker.checkinToProject(params,
+								toggleCheckinSuccess, toggleCheckinError);
+					}
+				}, function(error) {
+					$.mobile.hidePageLoadingMsg();
+				});
 	}
-	
+
 	function toggleCheckinSuccess() {
 		Project.findBy("fid", $.mobile.pageData.fid, function(project) {
 			//console.log(project);
 			var here = project.currentlyHere;
 			project.currentlyHere = !here
 			persistence.flush(function() {
-			  	$.mobile.changePage("#mainPage");	
+				$.mobile.changePage("#mainPage");
 				$.mobile.hidePageLoadingMsg();
 			});
 		});
 	}
-	
+
 	function toggleCheckinError() {
-		$.mobile.changePage("#mainPage");	
+		$.mobile.changePage("#mainPage");
 		$.mobile.hidePageLoadingMsg();
 	}
-	
+
 	function toggleShouldAutoUpdate() {
-		var mytoggle = $( "#notifyState" );
-		var shouldNotify = mytoggle[0].selectedIndex == 1 ? true:false;
+		var mytoggle = $("#notifyState");
+		var shouldNotify = mytoggle[0].selectedIndex == 1 ? true : false;
 		//MIKE TODO - Toggle Notify;
 		Project.findBy("fid", $.mobile.pageData.fid, function(project) {
-			var params = {"fid": project.fid, "latitude": project.latitude, "longitude": project.longitude, "shouldautoupdate": shouldNotify};
-	        DGPTimeTracker.setShouldAutoUpdateProjectEvents(
-	            params,
-				function(result) {      
-				},
-				function(error) {     
-				}
-			);
+			var params = {
+				"fid" : project.fid,
+				"latitude" : project.latitude,
+				"longitude" : project.longitude,
+				"shouldautoupdate" : shouldNotify
+			};
+			DGPTimeTracker.setShouldAutoUpdateProjectEvents(params, function(
+					result) {
+			}, function(error) {
+			});
 		});
 	}
-	
+
 	function getEventsForDate() {
 		$.mobile.showPageLoadingMsg();
 		var month = $('#month').val();
 		var year = $('#year').val();
-		var params = {"year": year, "month": month};
-        DGPTimeTracker.retrieveProjectEventsForDate(
-            params,
-			function(result) { 
-				var events = result; 
-				var list = $( "#eventsPage" ).find( ".lstMyEvents" );
-				//Empty current list
-		        list.empty();
-				//Use template to create items & add to list
-				$( "#eventItem" ).tmpl( events ).appendTo( list );
-				//Call the listview jQuery UI Widget after adding 
-				//items to the list allowing correct rendering
-				list.listview( "refresh" );
-				$.mobile.hidePageLoadingMsg();
-			},
-			function(error) {   
-				alert("Error: " + error);  
-				$.mobile.hidePageLoadingMsg();  
-			}
-		);
+		var params = {
+			"year" : year,
+			"month" : month
+		};
+		DGPTimeTracker.retrieveProjectEventsForDate(params, function(result) {
+			var events = result;
+			var list = $("#eventsPage").find(".lstMyEvents");
+			//Empty current list
+			list.empty();
+			//Use template to create items & add to list
+			$("#eventItem").tmpl(events).appendTo(list);
+			//Call the listview jQuery UI Widget after adding 
+			//items to the list allowing correct rendering
+			list.listview("refresh");
+			$.mobile.hidePageLoadingMsg();
+		}, function(error) {
+			alert("Error: " + error);
+			$.mobile.hidePageLoadingMsg();
+		});
 	}
-        
+
 	// onSuccess Callback
 	//   This method accepts a `Position` object, which contains
 	//   the current GPS coordinates
 	//
 	var onSuccess = function(position) {
-		currentLandL = position.coords.latitude+","+position.coords.longitude;
+		currentLandL = position.coords.latitude + ","
+				+ position.coords.longitude;
 		var parameters = {
-			ll: currentLandL, 
-			limit: '10', 
-			radius: '550'
+			ll : currentLandL,
+			limit : '10',
+			radius : '550'
 		};
 		fsclient.venuesClient.search(parameters, {
-			onSuccess: function(data) {
+			onSuccess : function(data) {
 				nearbyLocations = data.response.venues;
 				//alert(nearbyLocations);
 				$.mobile.changePage("#selectlocation");
 				clearNearbyLocations();
 				$.mobile.hidePageLoadingMsg();
-                var list = $("#selectlocation .locationlist");
+				var list = $("#selectlocation .locationlist");
 				//Use template to create items & add to list
-				$( "#locationItem" ).tmpl( nearbyLocations ).appendTo( list );
+				$("#locationItem").tmpl(nearbyLocations).appendTo(list);
 				//Call the listview jQuery UI Widget after adding 
 				//items to the list allowing correct rendering
-				list.listview( "refresh" ); 
+				list.listview("refresh");
 			},
-			onFailure: function(data) {
-				alert('Failed to retrieve locations. Please Try again. : ' + data.response);
+			onFailure : function(data) {
+				alert('Failed to retrieve locations. Please Try again. : '
+						+ data.response);
 				$.mobile.hidePageLoadingMsg();
 			}
 		});
-            /*alert('Latitude: '          + position.coords.latitude          + '\n' +
-             'Longitude: '         + position.coords.longitude         + '\n' +
-             'Altitude: '          + position.coords.altitude          + '\n' +
-             'Accuracy: '          + position.coords.accuracy          + '\n' +
-             'Altitude Accuracy: ' + position.coords.altitudeAccuracy  + '\n' +
-             'Heading: '           + position.coords.heading           + '\n' +
-             'Speed: '             + position.coords.speed             + '\n' +
-             'Timestamp: '         + new Date(position.timestamp)      + '\n');*/
+		/*alert('Latitude: '          + position.coords.latitude          + '\n' +
+		 'Longitude: '         + position.coords.longitude         + '\n' +
+		 'Altitude: '          + position.coords.altitude          + '\n' +
+		 'Accuracy: '          + position.coords.accuracy          + '\n' +
+		 'Altitude Accuracy: ' + position.coords.altitudeAccuracy  + '\n' +
+		 'Heading: '           + position.coords.heading           + '\n' +
+		 'Speed: '             + position.coords.speed             + '\n' +
+		 'Timestamp: '         + new Date(position.timestamp)      + '\n');*/
 	};
-        
+
 	// onError Callback receives a PositionError object
 	//
 	function onError(error) {
@@ -323,8 +323,7 @@
 		//	  'message: ' + error.message + '\n');
 		alert("Please enable location services for Tikal Time Tracker in your Settings App and then try again.")
 	}
-    
-    </script>
+</script>
 
 </head>
 <body onload="onBodyLoad()">
@@ -354,18 +353,18 @@
 
 	<div data-add-back-btn="true" data-role="page" id="eventsPage">
 		<div data-role="header" data-position="fixed" data-theme="b">
-			<a onClick="retrieveLocations();" data-icon="plus"
-				data-iconpos="right" class="ui-btn-right" data-theme="c">Send</a> <span
-				class="ui-title">Events</span>
+			<span class="ui-title">Events</span>
 		</div>
 
 		<div data-role="content">
 			<div data-role="fieldcontain">
 				<fieldset data-role="controlgroup">
-					<label for="year">Year</label>
-					<input type="number" name="number" id="year" value="2012" class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c">
-					<label for="month">Month</label>
-					<input type="number" name="number" id="month" value="05" class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c">
+					<label for="year">Year</label> <input type="number" name="number"
+						id="year" value="" placeholder="YYYY for example 2012"
+						class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c">
+					<label for="month">Month</label> <input type="number" name="number"
+						id="month" value="" placeholder="MM for example 05(may)"
+						class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c">
 				</fieldset>
 				<a onclick="getEventsForDate();" data-role="button"
 					data-transition="fade" data-theme="c"> Show Events </a>
@@ -435,8 +434,8 @@
 	<div data-role="page" data-theme="b" id="map_page" class="page-map"
 		data-add-back-btn="true" style="width: 100%; height: 100%;">
 		<script type="text/javascript">
-
-              </script>
+			
+		</script>
 		<div data-role="header" data-position="fixed" data-theme="b">
 			<a onClick="doAddLocation();" data-icon="plus" data-iconpos="right"
 				class="ui-btn-right" data-theme="c">Save</a> <span class="ui-title">View
