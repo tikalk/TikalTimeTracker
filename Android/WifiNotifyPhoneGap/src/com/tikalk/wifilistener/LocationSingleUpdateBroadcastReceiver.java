@@ -37,7 +37,7 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 	//constant for max distance from origional location to perform login
 	public static final float MAX_DIST = 500.0f;
 	//constant for min distance for a logout if user is less than that distance away won't perform logout
-	public static final float MIN_DIST = 30.0f;
+	public static final float MIN_DIST = 300.0f;
 	//string for intent filter on phonegap app
 	public static final String INTENT_FILTER_STRING = "com.tikal.location.tracker";
 	//KEYS FOR BUNDLE
@@ -90,10 +90,11 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		//verify that spot is within a certain distance if so then post notification
 		Location origLoc = mDB.getLocation(pending.getBSSID(), pending.getProjectID());
 		float dist = origLoc.distanceTo(verifyLoc);
+		Log.d(TAG, "log out request with dist " + dist);
 		if(dist < MAX_DIST){
 			String projectID = pending.getProjectID();
 			String projectName = mDB.getProjectNameFromID(projectID);
-
+			Log.d(TAG, "logging into " + projectName + " with distance of " + dist);
 			//if project is set for auto-update then login/logout
 			if(mDB.getAutoUpdate(projectID)){
 				//if login  passes, then log timestamp
@@ -116,7 +117,7 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		if(dist > MIN_DIST){
 			String projectID = pending.getProjectID();
 			String projectName = mDB.getProjectNameFromID(projectID);
-
+			Log.d(TAG, "logging out of " + projectName + " with distance of " + dist);
 			//if project is set for auto-update then login/logout
 
 			if(mDB.getAutoUpdate(projectID)){

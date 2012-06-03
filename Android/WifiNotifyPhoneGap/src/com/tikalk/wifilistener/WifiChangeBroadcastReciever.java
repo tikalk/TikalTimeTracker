@@ -3,14 +3,20 @@ package com.tikalk.wifilistener;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.R;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.tikalk.tools.DBTool;
+import com.tikalk.tools.Defined;
 import com.tikalk.tools.PendingEvent;
 import com.tikalk.tools.Shared;
 
@@ -19,7 +25,7 @@ public class WifiChangeBroadcastReciever extends BroadcastReceiver {
 	 * CONSTANTS
 	 */
 	public static final String TAG = WifiChangeBroadcastReciever.class.getName();
-
+	public static final int NO_WIFI_NOTIFY_ID = 412341;
 
 	/**
 	 * MEMBERS
@@ -37,9 +43,17 @@ public class WifiChangeBroadcastReciever extends BroadcastReceiver {
 			//insure that the service is running
 			Intent startServiceIntent = new Intent(context, WifiListenerService.class);
 			context.startService(startServiceIntent);
+		}		
+		Bundle extras = (intent==null)?null:intent.getExtras();
+		//check if wifi has been turned(turning) off
+		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+		if(extras!= null && extras.containsKey(WifiManager.EXTRA_WIFI_STATE) &&
+				((WifiManager.WIFI_STATE_DISABLED == extras.getInt(WifiManager.EXTRA_WIFI_STATE)) ||
+				(WifiManager.WIFI_STATE_DISABLING == extras.getInt(WifiManager.EXTRA_WIFI_STATE)))){
+			//Notify that app won't work with wifi turned off
+			notifyWifiOff(context);
 		}
 		//grab all wifi objects
-		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 		List<ScanResult> activeNetworkInfo = wifiManager.getScanResults();
 		int size;
 		if(activeNetworkInfo == null){
@@ -116,7 +130,38 @@ public class WifiChangeBroadcastReciever extends BroadcastReceiver {
 
 	}
 	
-	
+	//user has turned off wifi, notify that this will cause the application to not work properly
+		private void notifyWifiOff(Context context) {
+
+			/*Location spotLoc = mDB.getLocation(ssid);
+			Log.d("notify", "user is close to " + ssid + " at " + spotLoc.getLatitude() + "," + spotLoc.getLongitude());
+			 *///init login/logout variables
+			
+			String ns = Context.NOTIFICATION_SERVICE;
+			NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(ns);
+			int icon = R.drawable.ic_dialog_info;
+			CharSequence tickerText = "TimeTracker may not be working";
+			long when = System.currentTimeMillis();
+
+			Notification notification = new Notification(icon, tickerText, when);
+
+			CharSequence contentTitle = "TimeTracker";
+			CharSequence contentText = "With Wifi turned off TimeTracker will not work!";
+
+
+
+			PendingIntent contentIntent = PendingIntent.getActivity(context,NO_WIFI_NOTIFY_ID, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+
+			notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+
+			//add vibrate
+			long[] vibrate = {0,100,200,300, 0, 0, 100, 100, 0, 0, 0, 100, 100};
+			notification.vibrate = vibrate;
+
+			notification.flags |= Notification.FLAG_ONLY_ALERT_ONCE | Notification.FLAG_AUTO_CANCEL;
+			mNotificationManager.notify(NO_WIFI_NOTIFY_ID, notification);
+		}
+
 	
 
 }

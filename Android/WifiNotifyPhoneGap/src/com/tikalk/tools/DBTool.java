@@ -376,7 +376,7 @@ public class DBTool extends SQLiteOpenHelper {
 
 	// Getting All timestamps for a certain month in a certain year
 	public JSONArray getAllTimeStamps(int year, int month) {
-		Date startDate = new Date(year, month, 0);
+		Date startDate = new Date(year, month, 1);
 		long startTimeStamp = startDate.getTime();
 		Date endDate = new Date(year, month, 31);
 		long endTimeStamp = endDate.getTime();
