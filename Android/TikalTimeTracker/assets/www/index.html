@@ -104,7 +104,7 @@
 		project.latitude = currentLocation.location.lat;
 		project.longitude = currentLocation.location.lng;
 		project.currentlyHere = false;
-		persistence.add(project);
+
 
 		// Send Add to Native Code for Region Monitoring
 		var params = {
@@ -115,7 +115,10 @@
 			"address" : currentLocation.location.address
 		};
 		DGPTimeTracker.addProject(params, function(result) {
+			//on success add project to persistance
+			persistence.add(project);
 		}, function(error) {
+			alert("uh oh something has gone wrong")
 		});
 		persistence.flush(function() {
 			$.mobile.changePage("#mainPage");
