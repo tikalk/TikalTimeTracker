@@ -95,6 +95,7 @@
 		});
 	}
 
+	
 	function doAddLocation() {
 		$.mobile.showPageLoadingMsg();
 		var project = new Project();
@@ -250,6 +251,24 @@
 			});
 		});
 	}
+	function sendReports(){
+		$.mobile.showPageLoadingMsg();
+		var month = $('#month').val();
+		var year = $('#year').val();
+		if(month == "" || year == ""){
+			alert("Please enter a year and month");
+		}
+		var params = {
+			"year" : year,
+			"month" : month
+		};
+		DGPTimeTracker.sendReportsForDate(params, function(result) {
+			$.mobile.hidePageLoadingMsg();
+		}, function(error) {
+			$.mobile.hidePageLoadingMsg();
+			alert("Error: " + error);
+		});
+	}
 
 	function getEventsForDate() {
 		$.mobile.showPageLoadingMsg();
@@ -357,8 +376,10 @@
 	<div data-add-back-btn="true" data-role="page" id="eventsPage">
 		<div data-role="header" data-position="fixed" data-theme="b">
 			<span class="ui-title">Events</span>
+			<a onClick="sendReports();" data-icon="forward"
+			data-iconpos="right" class="ui-btn-right" data-theme="c">Send</a>
 		</div>
-
+		
 		<div data-role="content">
 			<div data-role="fieldcontain">
 				<fieldset data-role="controlgroup">
