@@ -274,11 +274,11 @@ public class DBTool extends SQLiteOpenHelper {
 			//find and update where start = stop and id = given
 			ContentValues updateTimestamp = new ContentValues();
 			updateTimestamp.put(KEY_TIMESTAMP_STOP,Long.toString(System.currentTimeMillis()));
-			
+
 			rowsAffected += db.update(TABLE_TIMES, updateTimestamp, 
 					KEY_TIMESTAMP_START + "="  + KEY_TIMESTAMP_STOP + " AND " 
-					+ KEY_PROJECT_ID + "=?", new String[]{projectID});  
-			
+							+ KEY_PROJECT_ID + "=?", new String[]{projectID});  
+
 		}
 
 		return(rowsAffected >= 1);
@@ -374,7 +374,7 @@ public class DBTool extends SQLiteOpenHelper {
 		return spotsList;
 	}
 
-	// Getting All timestamps for a certain month in a certain year
+	// Getting All checkin/checkout data for a certain month in a certain year
 	public JSONArray getAllTimeStamps(int year, int month) {
 		Date startDate = new Date(year, month, 1);
 		long startTimeStamp = startDate.getTime();
@@ -387,9 +387,9 @@ public class DBTool extends SQLiteOpenHelper {
 
 		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.query(TABLE_TIMES, new String[]{KEY_PROJECT_NAME, KEY_TIMESTAMP_START, KEY_TIMESTAMP_STOP},
-								KEY_TIMESTAMP_START + " > ?" + " AND " + KEY_TIMESTAMP_START + " < ?",
-								new String[]{Long.toString(startTimeStamp), Long.toString(endTimeStamp)}
-								, null, null, KEY_TIMESTAMP_START);
+				KEY_TIMESTAMP_START + " > ?" + " AND " + KEY_TIMESTAMP_START + " < ?",
+				new String[]{Long.toString(startTimeStamp), Long.toString(endTimeStamp)}
+		, null, null, KEY_TIMESTAMP_START + " ASC");
 
 		// looping through all rows and adding to list
 		if (cursor.moveToFirst()) {
@@ -418,6 +418,68 @@ public class DBTool extends SQLiteOpenHelper {
 		// return contact list
 		return timeLogJSON;
 	}
+
+	// Getting All checkin/checkout data for a certain month in a certain year
+	//return the data in FileDesc form so can be converted to files
+	public List<FileDesc> getTimestampData(int year, int month) {
+		Date startDate = new Date(year, month, 1);
+		long startTimeStamp = startDate.getTime();
+		Date endDate = new Date(year, month, 31);
+		long endTimeStamp = endDate.getTime();
+		List<FileDesc> retVal = new ArrayList<FileDesc>();
+
+		// Select All Query
+		//String selectQuery = "SELECT " + KEY_PROJECT_NAME + ", " + KEY_TIMESTAMP_START +", " + KEY_TIMESTAMP_STOP + " " + "FROM " + TABLE_TIMES;
+
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cursor = db.query(TABLE_TIMES, new String[]{KEY_PROJECT_NAME, KEY_TIMESTAMP_START, KEY_TIMESTAMP_STOP},
+				KEY_TIMESTAMP_START + " > ?" + " AND " + KEY_TIMESTAMP_START + " < ?",
+				new String[]{Long.toString(startTimeStamp), Long.toString(endTimeStamp)}
+		, null, null, KEY_PROJECT_NAME + " ASC");
+
+		// looping through all rows and adding to list
+		String currentProjectString = "", currCSVString = "";
+		//format of hours minutes for timesheet
+		SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm");
+		SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
+		while(cursor.moveToNext()) {
+			//grab start and end data
+			Date startTime = new Date(cursor.getInt(1));
+			Date endTime = new Date(cursor.getInt(2));
+			//grab project name
+			String projName = cursor.getString(0);
+			//first entry
+			if("".matches(currentProjectString)){
+				currentProjectString = projName;
+				//init first row
+				currCSVString = dayFormat.format(startTime) + "," + 
+						timeFormat.format(startTime) + "," + timeFormat.format(endTime) + "\n";
+			}
+			//new entry
+			else if(!currentProjectString.matches(projName)){
+				//new project push old project
+				retVal.add(new FileDesc(currentProjectString, currCSVString));
+				//start new project recording
+				currentProjectString = projName;
+				//init first row
+				currCSVString = dayFormat.format(startTime) + "," + 
+						timeFormat.format(startTime) + "," + timeFormat.format(endTime) + "\n";
+			}
+			//same as previous
+			else{
+				currCSVString += dayFormat.format(startTime) + "," + 
+						timeFormat.format(startTime) + "," + timeFormat.format(endTime) + "\n";
+			}	
+		}
+		//after done recording need to push last project
+		if(!"".matches(currentProjectString)){
+			//new project push old project
+			retVal.add(new FileDesc(currentProjectString, currCSVString));
+		}
+		cursor.close();
+		// return contact list
+		return retVal;
+	}
 	//checks if the waypoint exists
 	public boolean existsBSSID(String bSSID){
 		// Select All Query
@@ -438,7 +500,7 @@ public class DBTool extends SQLiteOpenHelper {
 		cursor.close();
 		return (count >=1);
 	}
-	//checks if the project is saved exists
+	//checks if the project exists
 	public boolean existsProject(String projectID){
 		// Select All Query
 		String selectQuery = "SELECT * FROM " + TABLE_PROJECTS + " WHERE " + KEY_PROJECT_ID + " = \'" + projectID + "\'";
@@ -458,12 +520,15 @@ public class DBTool extends SQLiteOpenHelper {
 		cursor.close();
 		return (count >=1);
 	}
-	//clears all items from the table
-	public void clearTable(){
+	//delete all the tables
+	public void clearTables(){
 		// Select All Query
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.delete(TABLE_SPOTS, null, null);
 		db.delete(TABLE_TIMES, null, null);
+		db.delete(TABLE_PROJECTS, null, null);
+		//regen
+		onCreate(db);
 	}
 	//returns all projectids with associated bssid with the 
 	public List<String> getProjectIDsForBSSID(String bssid) {
@@ -483,8 +548,17 @@ public class DBTool extends SQLiteOpenHelper {
 		return projecIDs;
 	}
 
+	//this is a helper class used for returning the data for the file attachments
+	public class FileDesc{
+		public String mFileName;//name for file (project name)
+		public String mCSVString;//values in comma-separated-value format
 
+		public FileDesc(String fileName, String CSV){
+			mFileName = fileName;
+			mCSVString = CSV;
+		}
 
+	}
 
 
 }

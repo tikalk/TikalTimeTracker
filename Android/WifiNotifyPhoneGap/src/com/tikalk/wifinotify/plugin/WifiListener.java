@@ -1,5 +1,10 @@
 package com.tikalk.wifinotify.plugin;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.cordova.api.PluginResult;
@@ -8,11 +13,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.util.Log;
@@ -20,6 +28,7 @@ import android.webkit.WebSettings.PluginState;
 
 import com.phonegap.api.Plugin;
 import com.tikalk.tools.DBTool;
+import com.tikalk.tools.DBTool.FileDesc;
 import com.tikalk.tools.Defined;
 import com.tikalk.tools.PendingEvent;
 import com.tikalk.tools.Shared;
@@ -56,13 +65,13 @@ public class WifiListener extends Plugin {
 	public static final String ACTION_CHECKIN = "checkinToProject";
 	//confirm to logout of a place
 	public static final String ACTION_CHECKOUT = "checkoutOfProject";
-	//requests the details for the notificaiton click
+	//requests the details for the notificaiton click (currently not reachable in API)
 	public static final String ACTION_GET_NOTIFY_DETAILS = "get_notify_details";
 	//requests the formatted log for logins and logouts
 	public static final String ACTION_RETRIEVE_EVENTS_FOR_DATE = "retrieveProjectEventsForDate";
-	//request for current wifi state
+	//request for current wifi state(currently not reachable in API)
 	public static final String ACTION_GET_WIFI_STATE = "get_wifi_state";
-	//request to change wifi state
+	//request to change wifi state(currently not reachable in API)
 	public static final String ACTION_SET_WIFI_STATE = "set_wifi_state";
 	//request project notification state
 	public static final String ACTION_GET_SHOULD_AUTO_UPDATE = "getShouldAutoUpdateProjectEvents";
@@ -70,6 +79,8 @@ public class WifiListener extends Plugin {
 	public static final String ACTION_SET_SHOULD_AUTO_UPDATE = "setShouldAutoUpdateProjectEvents";
 	//remove a project from 
 	public static final String ACTION_REMOVE_PROJECT = "removeProject";
+	//send an email with all log reports
+	public static final String ACTION_EMAIL_REPORTS = "sendReportsForDate";
 
 	//KEY CONSTANTS
 	public static final String KEY_PROJECT_ID = "fid";
@@ -81,11 +92,11 @@ public class WifiListener extends Plugin {
 
 	public static final String KEY_DATE_YEAR = "year";
 	public static final String KEY_DATE_MONTH = "month";
-	
+
 	//internal keys
 	public static final String KEY_TIMESTAMP_START = "checkin";
 	public static final String KEY_TIMESTAMP_STOP = "checkout";
-	
+
 	public static final String KEY_LOGGED_IN_BOOL = "loggedinbool";
 
 	@Override
@@ -247,18 +258,15 @@ public class WifiListener extends Plugin {
 				db.close();
 				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
 			}
-			//convert year to 1900=0 format and month to jan=0 format
+			//convert year to Date format (1900r=0df) format and month to Date format (jan=0)
 			year -= 1900;
 			month--;
 			JSONArray logDetails = db.getAllTimeStamps(year, month);
 			db.close();
 			//if failed then return error
 			if(logDetails == null){
-				db.close();
 				return new PluginResult(Status.ERROR, "returned null from DB");
 			}
-			
-			db.close();
 			return new PluginResult(Status.OK, logDetails);
 		}
 		else if(action.matches(ACTION_GET_WIFI_STATE)){
@@ -282,7 +290,7 @@ public class WifiListener extends Plugin {
 			db.close();
 			//return current wifi state
 			return new PluginResult(Status.OK, wifiManager.isWifiEnabled());
-			
+
 		}
 		else if(action.matches(ACTION_GET_SHOULD_AUTO_UPDATE)){
 			String projectID;
@@ -295,7 +303,7 @@ public class WifiListener extends Plugin {
 				db.close();
 				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
 			}
-			
+
 			db.close();
 			return new PluginResult(Status.OK,retVal);
 		}
@@ -305,7 +313,7 @@ public class WifiListener extends Plugin {
 			try {
 				projectID = data.getJSONObject(0).getString(KEY_PROJECT_ID);
 				shouldAuto = data.getJSONObject(0).getBoolean(KEY_SHOULD_UPDATE_BOOL);
-				
+
 			} catch (JSONException e) {
 				db.close();
 				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
@@ -316,7 +324,7 @@ public class WifiListener extends Plugin {
 		}
 		else if(action.matches(ACTION_REMOVE_PROJECT)){
 			String projectID = "";
-			
+
 			try {
 				projectID = data.getJSONObject(0).getString(KEY_PROJECT_ID);
 			} catch (JSONException e) {
@@ -332,13 +340,99 @@ public class WifiListener extends Plugin {
 				return new PluginResult(Status.ERROR, "Failed to remove");
 			}
 		}
+		else if(action.matches(ACTION_EMAIL_REPORTS)){
+			//get string file data
+			//grab month and year from the caller and pass to dbtool
+			int year, month;
+			try {
+				year = data.getJSONObject(0).getInt(KEY_DATE_YEAR);
+				month = data.getJSONObject(0).getInt(KEY_DATE_MONTH);
+			} catch (JSONException e) {
+				// invalid values
+				db.close();
+				return  new PluginResult(Status.ERROR, getJsonObjectError(e));
+			}
+			//convert year to Date format (1900r=0df) format and month to Date format (jan=0)
+			year -= 1900;
+			month--;
+			List<FileDesc> logDetails = db.getTimestampData(year, month);
+			db.close();
+			File outputDir = context.getCacheDir(); // context being the Activity pointer
 
+
+			//need to "send multiple" to get more than one attachment
+			final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
+			emailIntent.setType("text/plain");
+			emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//			emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, 
+//					new String[]{"mhantinisrael@gmail.com"});
+//			//		    emailIntent.putExtra(android.content.Intent.EXTRA_CC, 
+			//		        new String[]{emailCC});
+			
+			//has to be an ArrayList
+			ArrayList<Uri> uris = new ArrayList<Uri>();
+			File fileIn;
+			//convert from paths to Android friendly Parcelable Uri's
+			for (FileDesc log : logDetails)
+			{
+				try {
+					fileIn = File.createTempFile(log.mFileName, ".csv", new File("mnt/sdcard/tmp/"));
+					fileIn.deleteOnExit();
+					//write data to file
+					boolean passed = writeStringsToData(fileIn, log);
+					//if succeeded to write to file
+					if(passed){
+						Uri u = Uri.fromFile(fileIn);
+						uris.add(u);
+					}
+					//failed to write to a file
+					else{
+						return new PluginResult(Status.ERROR, "Failed to write to files");
+					}
+				} catch (IOException e) {
+					return new PluginResult(Status.ERROR, "Failed to create files");
+				}
+
+			}
+			emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+			this.ctx.startActivity(emailIntent);
+			//always need to return true here even if email fails, because information will come later
+			return new PluginResult(Status.OK);
+		}
 
 
 		if(result == null)
 			result = new PluginResult(Status.ERROR, getJsonObjectError(new JSONException("no value")));
 		db.close();
 		return result;
+	}
+
+	private boolean writeStringsToData(File fileIn, FileDesc log){
+		boolean writePassed = true;
+		FileOutputStream fOut = null;
+
+		OutputStreamWriter outSW = null;
+
+		try {
+			fOut = new FileOutputStream(fileIn);
+			outSW = new OutputStreamWriter(fOut);
+			outSW.write(log.mCSVString);
+			outSW.flush();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			writePassed = false;
+		}
+		finally {
+			try {
+				outSW.close();
+				fOut.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+				writePassed = false;
+			}
+		}
+		return(writePassed);
 	}
 
 	private JSONObject getJsonObjectError(JSONException e) {
