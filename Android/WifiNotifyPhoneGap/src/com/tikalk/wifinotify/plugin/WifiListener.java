@@ -13,28 +13,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
-import android.webkit.WebSettings.PluginState;
 
 import com.phonegap.api.Plugin;
 import com.tikalk.tools.DBTool;
 import com.tikalk.tools.DBTool.FileDesc;
 import com.tikalk.tools.Defined;
-import com.tikalk.tools.PendingEvent;
 import com.tikalk.tools.Shared;
-import com.tikalk.wifilistener.LocationSingleUpdateBroadcastReceiver;
 import com.tikalk.wifilistener.WifiListenerService;
-import com.tikalk.wifilistener.WifiListenerService.LocalBinder;
 
 
 /**
@@ -49,6 +43,10 @@ public class WifiListener extends Plugin {
 	 * CONSTANTS
 	 */
 	public static final String TAG = WifiListener.class.getName();
+	
+	//temp file directory (for sending email attachments)
+	public static final String TEMP_DIR = "temp_tikal_reports";
+	public static final String EMAIL_SUBJECT_PREFIX = "Reports for ";//format for subject is "Reports for [month] [year]"
 
 	//ACTIONS
 	//start up the monitoring service
@@ -357,27 +355,30 @@ public class WifiListener extends Plugin {
 			month--;
 			List<FileDesc> logDetails = db.getTimestampData(year, month);
 			db.close();
-			File outputDir = context.getCacheDir(); // context being the Activity pointer
+			File outputDir = getTempDirectory();
 
 
 			//need to "send multiple" to get more than one attachment
 			final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
 			emailIntent.setType("text/plain");
 			emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			//set the subject to reports for the month and year
+			emailIntent.putExtra(Intent.EXTRA_SUBJECT, EMAIL_SUBJECT_PREFIX + ( month + 1) + ", " + (year + 1900)); 
+			
 //			emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, 
 //					new String[]{"mhantinisrael@gmail.com"});
 //			//		    emailIntent.putExtra(android.content.Intent.EXTRA_CC, 
 			//		        new String[]{emailCC});
 			
-			//has to be an ArrayList
+
 			ArrayList<Uri> uris = new ArrayList<Uri>();
 			File fileIn;
 			//convert from paths to Android friendly Parcelable Uri's
 			for (FileDesc log : logDetails)
 			{
 				try {
-					fileIn = File.createTempFile(log.mFileName, ".csv", new File("mnt/sdcard/tmp/"));
-					fileIn.deleteOnExit();
+					fileIn = File.createTempFile(log.mFileName, ".csv", outputDir);
+//					fileIn.deleteOnExit();
 					//write data to file
 					boolean passed = writeStringsToData(fileIn, log);
 					//if succeeded to write to file
@@ -405,6 +406,21 @@ public class WifiListener extends Plugin {
 			result = new PluginResult(Status.ERROR, getJsonObjectError(new JSONException("no value")));
 		db.close();
 		return result;
+	}
+	
+	//each time we grab the temp directory clean it out
+	private File getTempDirectory() {
+		//make sure the temp directory exists
+		File dir = new File(Environment.getExternalStorageDirectory() + "/" + TEMP_DIR + "/");
+		if(!dir.isDirectory()) {
+			dir.mkdir();
+		}
+		//delete any old files on new send
+		File[] oldFiles = dir.listFiles();
+		for(File oldFile : oldFiles){
+			oldFile.delete();
+		}
+		return dir;
 	}
 
 	private boolean writeStringsToData(File fileIn, FileDesc log){

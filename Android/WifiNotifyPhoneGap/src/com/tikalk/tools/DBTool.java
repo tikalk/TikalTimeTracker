@@ -9,9 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.tikalk.wifilistener.WifiListenerService;
-import com.tikalk.wifinotify.plugin.WifiListener;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -20,6 +17,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
 import android.util.Log;
+
+import com.tikalk.wifinotify.plugin.WifiListener;
 
 public class DBTool extends SQLiteOpenHelper {
 
@@ -401,9 +400,10 @@ public class DBTool extends SQLiteOpenHelper {
 					tempObject.put(WifiListener.KEY_PROJECT_NAME, cursor.getString(0));
 					//convert timestamps to strings
 					long tStart = cursor.getLong(1), tEnd = cursor.getLong(2);
-					SimpleDateFormat format = new SimpleDateFormat("MMM dd,yyyy  hh:mm");
+					SimpleDateFormat format = new SimpleDateFormat("MMM dd,yyyy  HH:mm");
 					tempObject.put(WifiListener.KEY_TIMESTAMP_START, format.format(new Date(tStart)));
-					tempObject.put(WifiListener.KEY_TIMESTAMP_STOP, format.format(new Date(tEnd)));
+					//if tStart == tEnd then still logged in so print --- showing still logged in
+					tempObject.put(WifiListener.KEY_TIMESTAMP_STOP, tStart == tEnd?"----":format.format(new Date(tEnd)));
 
 					timeLogJSON.put(tempObject);
 				} catch (JSONException e) {
@@ -440,12 +440,12 @@ public class DBTool extends SQLiteOpenHelper {
 		// looping through all rows and adding to list
 		String currentProjectString = "", currCSVString = "";
 		//format of hours minutes for timesheet
-		SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm");
+		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 		SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
 		while(cursor.moveToNext()) {
 			//grab start and end data
-			Date startTime = new Date(cursor.getInt(1));
-			Date endTime = new Date(cursor.getInt(2));
+			Date startTime = new Date(cursor.getLong(1));
+			Date endTime = new Date(cursor.getLong(2));
 			//grab project name
 			String projName = cursor.getString(0);
 			//first entry
