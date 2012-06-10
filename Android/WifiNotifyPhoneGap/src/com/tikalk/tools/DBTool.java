@@ -52,6 +52,9 @@ public class DBTool extends SQLiteOpenHelper {
 	public static final String KEY_TIMESTAMP_STOP = "timestamp_stop";//INT
 	//int/boolean that declares if the project is set up for auto updating
 	public static final String KEY_AUTO_UPDATE = "auto_update";//INT
+	
+	//seperateor for spreadsheet files
+	public static final String SEPERATOR = "\t";
 
 	//values for logged in int/boolean
 	public static final int BOOL_TRUE = 0;
@@ -452,8 +455,8 @@ public class DBTool extends SQLiteOpenHelper {
 			if("".matches(currentProjectString)){
 				currentProjectString = projName;
 				//init first row
-				currCSVString = dayFormat.format(startTime) + "," + 
-						timeFormat.format(startTime) + "," + timeFormat.format(endTime) + "\n";
+				currCSVString = dayFormat.format(startTime) + SEPERATOR + 
+						timeFormat.format(startTime) + SEPERATOR + timeFormat.format(endTime) + "\n";
 			}
 			//new entry
 			else if(!currentProjectString.matches(projName)){
@@ -462,13 +465,13 @@ public class DBTool extends SQLiteOpenHelper {
 				//start new project recording
 				currentProjectString = projName;
 				//init first row
-				currCSVString = dayFormat.format(startTime) + "," + 
-						timeFormat.format(startTime) + "," + timeFormat.format(endTime) + "\n";
+				currCSVString = dayFormat.format(startTime) + SEPERATOR + 
+						timeFormat.format(startTime) + SEPERATOR + timeFormat.format(endTime) + "\n";
 			}
 			//same as previous
 			else{
-				currCSVString += dayFormat.format(startTime) + "," + 
-						timeFormat.format(startTime) + "," + timeFormat.format(endTime) + "\n";
+				currCSVString += dayFormat.format(startTime) + SEPERATOR + 
+						timeFormat.format(startTime) + SEPERATOR + timeFormat.format(endTime) + "\n";
 			}	
 		}
 		//after done recording need to push last project

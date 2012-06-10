@@ -377,7 +377,7 @@ public class WifiListener extends Plugin {
 			for (FileDesc log : logDetails)
 			{
 				try {
-					fileIn = File.createTempFile(log.mFileName, ".csv", outputDir);
+					fileIn = File.createTempFile(log.mFileName, ".xls", outputDir);
 //					fileIn.deleteOnExit();
 					//write data to file
 					boolean passed = writeStringsToData(fileIn, log);
