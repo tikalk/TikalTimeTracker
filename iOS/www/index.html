@@ -243,34 +243,55 @@
 			);
 		});
 	}
-	
-	function getEventsForDate() {
-		$.mobile.showPageLoadingMsg();
-		var newdate = $('#mydate').val();
-		var dateVal = newdate.split("-");
-		var month = dateVal[1];
-		var year = dateVal[0];
-		var params = {"year": year, "month": month};
-        DGPTimeTracker.retrieveProjectEventsForDate(
-            params,
-			function(result) { 
-				var events = result; 
-				var list = $( "#eventsPage" ).find( ".lstMyEvents" );
-				//Empty current list
-		        list.empty();
-				//Use template to create items & add to list
-				$( "#eventItem" ).tmpl( events ).appendTo( list );
-				//Call the listview jQuery UI Widget after adding 
-				//items to the list allowing correct rendering
-				list.listview( "refresh" );
-				$.mobile.hidePageLoadingMsg();
-			},
-			function(error) {   
-				alert("Error: " + error);  
-				$.mobile.hidePageLoadingMsg();  
+
+		function getEventsForDate() {
+			$.mobile.showPageLoadingMsg();
+			var newdate = $('#mydate').val();
+			var dateVal = newdate.split("-");
+			var month = dateVal[1];
+			var year = dateVal[0];
+			var params = {"year": year, "month": month};
+	        DGPTimeTracker.retrieveProjectEventsForDate(
+	            params,
+				function(result) { 
+					var events = result; 
+					var list = $( "#eventsPage" ).find( ".lstMyEvents" );
+					//Empty current list
+			        list.empty();
+					//Use template to create items & add to list
+					$( "#eventItem" ).tmpl( events ).appendTo( list );
+					//Call the listview jQuery UI Widget after adding 
+					//items to the list allowing correct rendering
+					list.listview( "refresh" );
+					$.mobile.hidePageLoadingMsg();
+				},
+				function(error) {   
+					alert("Error: " + error);  
+					$.mobile.hidePageLoadingMsg();  
+				}
+			);
+		}
+
+			function exportEventsForDate() {
+				$.mobile.showPageLoadingMsg();
+				var newdate = $('#mydate').val();
+				var dateVal = newdate.split("-");
+				var month = dateVal[1];
+				var year = dateVal[0];
+				var params = {"year": year, "month": month};
+		        DGPTimeTracker.exportProjectsForDate(
+		            params,
+					function(result) { 
+						$.mobile.hidePageLoadingMsg();
+					},
+					function(error) {   
+						alert("Error: " + error);  
+						$.mobile.hidePageLoadingMsg();  
+					}
+				);
 			}
-		);
-	}
+        
+    
         
 	// onSuccess Callback
 	//   This method accepts a `Position` object, which contains
@@ -348,7 +369,7 @@
 
 	  <div data-add-back-btn="true" data-role="page" id="eventsPage">
 		<div data-role="header" data-position="fixed" data-theme="b"> 
-			<a onClick="retrieveLocations();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Send</a>
+			<a onClick="exportEventsForDate();" data-icon="plus" data-iconpos="right" class="ui-btn-right" data-theme="c">Send</a>
 			<span class="ui-title">Events</span>
 		</div>
 		

@@ -7,12 +7,174 @@
 //
 
 #import "DGPTimeTracker.h"
-#import "AppDelegate.h"
 #import "Project.h"
 #import "Event.h"
+#import "AppDelegate.h"
 #import "NSDate+Utils.h"
 
+
 @implementation DGPTimeTracker
+
+- (void)exportProjectsForDate:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
+    NSUInteger argc = [arguments count];
+    NSString* callbackId = (argc > 0)? [arguments objectAtIndex:0] : @"INVALID";
+    
+    NSString *month = [options objectForKey:KEY_MONTH];
+    NSString *year = [options objectForKey:KEY_YEAR];
+    
+    if ([month isEqualToString:@""] || [year isEqualToString:@""]) {
+        [self returnLocationError:20 withMessage: @"Please supply a month and year"];
+        return;
+    }
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];    
+	
+    NSError *dberror;
+    NSArray *items = [self.managedObjectContext executeFetchRequest:fetchRequest error:&dberror];
+    [fetchRequest release];
+    
+    NSMutableArray *events = [NSMutableArray array];
+    
+    NSString *fileContents = nil;
+    NSMutableArray *files = [NSMutableArray array];
+    NSMutableArray *fileNames = [NSMutableArray array];
+    
+    NSArray       *myPathList        =  NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    
+    for (Project *project in items) {
+        if (project.event) {
+            fileContents = nil;
+            for (Event *event in project.event) {
+                NSDate *checkin = event.checkin;
+                NSDateComponents *components = [[NSCalendar currentCalendar] components:NSMonthCalendarUnit | NSYearCalendarUnit | NSDayCalendarUnit |NSHourCalendarUnit | NSMinuteCalendarUnit fromDate:checkin];
+                int _m = [month intValue];
+                int _y = [year intValue];
+                if (_m == [components month] && _y == [components year] && event.project) {
+                    
+                    if (!fileContents) {
+                        fileContents = @"day\tstart\tend\n";
+                    } 
+                    fileContents = [fileContents stringByAppendingFormat:@"%@\t%@\t%@\n", [self dateDay:event.checkin], [self dateTime:event.checkin], [self dateTime:event.checkout]];        
+                }
+            }
+            if (fileContents) {
+                // write to file
+                NSString *path = [myPathList  objectAtIndex:0];
+                [fileNames addObject:[NSString stringWithFormat:@"%@_%@%@.tsv",project.name, month, year]];
+                [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@_%@%@.tsv",project.name, month, year]];
+                [files addObject:fileContents];
+            }
+        }  
+    }
+    
+    if ([files count] > 0) {
+        // send email
+        MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
+        mailViewController.mailComposeDelegate = self;
+        
+        
+        int i = 0;
+        for (NSString *filepath in files) {
+            NSData *data = [filepath dataUsingEncoding:NSUTF8StringEncoding];
+            NSString *mimeType = @"text";
+            NSString *filename = [fileNames objectAtIndex:i];
+            [mailViewController addAttachmentData:data mimeType:mimeType fileName:filename];
+            i++;
+        }
+        
+        [mailViewController setSubject:[NSString stringWithFormat:@"%@ %@ Tikal Project Report", month, year]];
+        [mailViewController setMessageBody:[NSString stringWithFormat:@"Here are your project reports for %@ %@", month, year] isHTML:NO];
+        
+        [self.viewController presentModalViewController:mailViewController animated:YES];
+        [mailViewController release];
+    }
+    
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:events];
+    [super writeJavascript:[result toSuccessCallbackString:callbackId]];
+}
+
+- (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error {
+    [self.viewController dismissModalViewControllerAnimated:YES];
+}
+
+- (void)retrieveProjectEventsForDate:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
+    NSUInteger argc = [arguments count];
+    NSString* callbackId = (argc > 0)? [arguments objectAtIndex:0] : @"INVALID";
+    
+    NSString *month = [options objectForKey:KEY_MONTH];
+    NSString *year = [options objectForKey:KEY_YEAR];
+    
+    if ([month isEqualToString:@""] || [year isEqualToString:@""]) {
+        [self returnLocationError:20 withMessage: @"Please supply a month and year"];
+        return;
+    }
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Event" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];    
+	
+    NSError *dberror;
+    NSArray *items = [self.managedObjectContext executeFetchRequest:fetchRequest error:&dberror];
+    [fetchRequest release];
+    
+    NSMutableArray *events = [NSMutableArray array];
+    
+    for (Event *event in items) {
+        NSDate *checkin = event.checkin;
+        NSDateComponents *components = [[NSCalendar currentCalendar] components:NSMonthCalendarUnit | NSYearCalendarUnit fromDate:checkin];
+        int _m = [month intValue];
+        int _y = [year intValue];
+        if (_m == [components month] && _y == [components year] && event.project) {
+            NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+            [dict setObject:[self formatDate:event.checkin]
+                     forKey:KEY_EVENT_CHECKIN];
+            [dict setObject:[self formatDate:event.checkout] forKey:KEY_EVENT_CHECKOUT];
+            [dict setObject:event.project.name forKey:KEY_PROJECT_NAME];
+            [events addObject:dict];
+        }
+    }
+    
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:events];
+    [super writeJavascript:[result toSuccessCallbackString:callbackId]];
+}
+
+-(NSString *) formatDate:(NSDate *)date {
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"dd/MM/yyyy HH:mm:ss"];
+    [dateFormat setTimeZone:[NSTimeZone defaultTimeZone]];
+    
+    NSString *theDate = [dateFormat stringFromDate:[date toGlobalTime]];
+    return theDate;
+}
+
+-(NSString *) dateMonthYear:(NSDate *)date {
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"MMyyyy"];
+    [dateFormat setTimeZone:[NSTimeZone defaultTimeZone]];
+    
+    NSString *theDate = [dateFormat stringFromDate:[date toGlobalTime]];
+    return theDate;
+}                 
+
+-(NSString *) dateDay:(NSDate *)date {
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"d"];
+    [dateFormat setTimeZone:[NSTimeZone defaultTimeZone]];
+    
+    NSString *theDate = [dateFormat stringFromDate:[date toGlobalTime]];
+    return theDate;
+}
+
+-(NSString *) dateTime:(NSDate *)date {
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"HH:mm"];
+    [dateFormat setTimeZone:[NSTimeZone defaultTimeZone]];
+    
+    NSString *theDate = [dateFormat stringFromDate:[date toGlobalTime]];
+    return theDate;
+}
 
 - (void)addProject:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
     NSUInteger argc = [arguments count];
@@ -96,7 +258,6 @@
     
     [self saveGeofenceCallbackId:callbackId];
     
-    // Add Project To Coredata
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"Project" inManagedObjectContext:self.managedObjectContext];
     [fetchRequest setEntity:entity];
@@ -311,10 +472,17 @@
         return;
     }
     
-    // Now check out of any current projects
-    [self forceCheckoutFromAllProjects];
+
     
     Project *project = [items objectAtIndex:0];
+    
+    if ([project.currentlyHere boolValue]) {
+        // do nothing
+        return;
+    }
+    
+    // Now check out of any current projects
+    [self forceCheckoutFromAllProjects];
     
     project.currentlyHere = [NSNumber numberWithBool:YES];
     
@@ -367,13 +535,14 @@
     
     Project *project = [items objectAtIndex:0];
     
+    project.currentlyHere = [NSNumber numberWithBool:NO];
+    
     // Create New Event Item
     NSSet *events = project.event;
     
     for (Event *event in events.allObjects) {
         if ([event.checkout isEqualToDate:event.checkin]) {
             event.checkout = [[NSDate date] toLocalTime];
-            project.currentlyHere = [NSNumber numberWithBool:NO];
         }
     }
     
@@ -398,8 +567,7 @@
 }
 
 -(NSManagedObjectContext *) managedObjectContext {
-    id ad = [super appDelegate];
-    return ((AppDelegate *)ad).managedObjectContext;
+    return ((AppDelegate*)self.appDelegate).managedObjectContext;
 }
 
 - (void) locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region

@@ -13,6 +13,9 @@
 		950EC66F1556AB490055DE9B /* DGPTimeTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = 950EC66E1556AB490055DE9B /* DGPTimeTracker.m */; };
 		9520B76A1552FC5C0051FD0F /* Geofencing.m in Sources */ = {isa = PBXBuildFile; fileRef = 9520B7691552FC5C0051FD0F /* Geofencing.m */; };
 		957F6BDF1557F49B008C43A8 /* NSDate+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 957F6BDE1557F49B008C43A8 /* NSDate+Utils.m */; };
+		958B1172158485D9002AC974 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 958B1171158485D9002AC974 /* MessageUI.framework */; };
+		958B11891584C808002AC974 /* Tikal_Icon_57_57.png in Resources */ = {isa = PBXBuildFile; fileRef = 958B11881584C808002AC974 /* Tikal_Icon_57_57.png */; };
+		958B118C1584C80D002AC974 /* Tikal_Icon_114.png in Resources */ = {isa = PBXBuildFile; fileRef = 958B118B1584C80D002AC974 /* Tikal_Icon_114.png */; };
 		95CE84CD153C798300FBCFB2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CE84CC153C798300FBCFB2 /* Foundation.framework */; };
 		95CE84CF153C798300FBCFB2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CE84CE153C798300FBCFB2 /* UIKit.framework */; };
 		95CE84D1153C798300FBCFB2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CE84D0153C798300FBCFB2 /* CoreGraphics.framework */; };
@@ -46,10 +49,10 @@
 		95CE851E153C798400FBCFB2 /* verify.sh in Resources */ = {isa = PBXBuildFile; fileRef = 95CE851D153C798400FBCFB2 /* verify.sh */; };
 		95CE8525153C79CF00FBCFB2 /* www in Resources */ = {isa = PBXBuildFile; fileRef = 95CE8524153C79CF00FBCFB2 /* www */; };
 		95E8A9071556A1AC00CFC861 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95E8A9061556A1AC00CFC861 /* CoreData.framework */; };
+		95F037DA156A6F8B005F4950 /* Tikalk.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 95F037D9156A6F8B005F4950 /* Tikalk.gpx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-<<<<<<< HEAD
 		950EC6651556A70B0055DE9B /* TimeTracker.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TimeTracker.xcdatamodel; sourceTree = "<group>"; };
 		950EC6671556AAE20055DE9B /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Event.h; path = Classes/Event.h; sourceTree = "<group>"; };
 		950EC6681556AAE20055DE9B /* Event.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Event.m; path = Classes/Event.m; sourceTree = "<group>"; };
@@ -61,10 +64,9 @@
 		9520B7691552FC5C0051FD0F /* Geofencing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Geofencing.m; path = Plugins/Geofencing.m; sourceTree = "<group>"; };
 		957F6BDD1557F49B008C43A8 /* NSDate+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSDate+Utils.h"; path = "Classes/NSDate+Utils.h"; sourceTree = "<group>"; };
 		957F6BDE1557F49B008C43A8 /* NSDate+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSDate+Utils.m"; path = "Classes/NSDate+Utils.m"; sourceTree = "<group>"; };
-=======
-		27D0CB8C1569292D00E7CC46 /* krypton.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = krypton.gpx; path = ../../../../Users/mike/Desktop/krypton.gpx; sourceTree = "<group>"; };
-		27D0CB8D1569292D00E7CC46 /* Tikal Offices.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "Tikal Offices.gpx"; path = "../../../../Users/mike/Desktop/Tikal Offices.gpx"; sourceTree = "<group>"; };
->>>>>>> no changes
+		958B1171158485D9002AC974 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		958B11881584C808002AC974 /* Tikal_Icon_57_57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Tikal_Icon_57_57.png; sourceTree = "<group>"; };
+		958B118B1584C80D002AC974 /* Tikal_Icon_114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Tikal_Icon_114.png; sourceTree = "<group>"; };
 		95CE84C8153C798300FBCFB2 /* TikalTimeTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TikalTimeTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		95CE84CC153C798300FBCFB2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		95CE84CE153C798300FBCFB2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -104,6 +106,7 @@
 		95CE851D153C798400FBCFB2 /* verify.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = verify.sh; sourceTree = "<group>"; };
 		95CE8524153C79CF00FBCFB2 /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		95E8A9061556A1AC00CFC861 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		95F037D9156A6F8B005F4950 /* Tikalk.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = Tikalk.gpx; path = TikalTimeTracker/Resources/Tikalk.gpx; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +114,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				958B1172158485D9002AC974 /* MessageUI.framework in Frameworks */,
 				95CE84CD153C798300FBCFB2 /* Foundation.framework in Frameworks */,
 				95CE84CF153C798300FBCFB2 /* UIKit.framework in Frameworks */,
 				95CE84D1153C798300FBCFB2 /* CoreGraphics.framework in Frameworks */,
@@ -142,8 +146,10 @@
 		95CE84BA153C798300FBCFB2 = {
 			isa = PBXGroup;
 			children = (
-				27D0CB8C1569292D00E7CC46 /* krypton.gpx */,
-				27D0CB8D1569292D00E7CC46 /* Tikal Offices.gpx */,
+				958B118B1584C80D002AC974 /* Tikal_Icon_114.png */,
+				958B11881584C808002AC974 /* Tikal_Icon_57_57.png */,
+				958B1171158485D9002AC974 /* MessageUI.framework */,
+				95F037D9156A6F8B005F4950 /* Tikalk.gpx */,
 				95CE8524153C79CF00FBCFB2 /* www */,
 				95CE84E6153C798300FBCFB2 /* TikalTimeTracker */,
 				95CE84CB153C798300FBCFB2 /* Frameworks */,
@@ -372,6 +378,9 @@
 				95CE851A153C798400FBCFB2 /* MainViewController.xib in Resources */,
 				95CE851E153C798400FBCFB2 /* verify.sh in Resources */,
 				95CE8525153C79CF00FBCFB2 /* www in Resources */,
+				95F037DA156A6F8B005F4950 /* Tikalk.gpx in Resources */,
+				958B11891584C808002AC974 /* Tikal_Icon_57_57.png in Resources */,
+				958B118C1584C80D002AC974 /* Tikal_Icon_114.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

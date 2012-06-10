@@ -78,5 +78,15 @@ var DGPTimeTracker = {
 	*/
      retrieveProjectEventsForDate: function(params, success, fail) {
           return PhoneGap.exec(success, fail, "DGPTimeTracker", "retrieveProjectEventsForDate", [params]);
-     }
+     },
+    
+    
+	/*
+     Params:
+     #define KEY_YEAR                            @"year"
+     #define KEY_MONTH                           @"month"
+     */
+    exportProjectsForDate: function(params, success, fail) {
+        return PhoneGap.exec(success, fail, "DGPTimeTracker", "exportProjectsForDate", [params]);
+    }
 };

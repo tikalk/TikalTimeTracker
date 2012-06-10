@@ -8,12 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
+#import "Project.h"
 
 
 @interface Event : NSManagedObject
 
 @property (nonatomic, retain) NSDate * checkin;
 @property (nonatomic, retain) NSDate * checkout;
-@property (nonatomic, retain) NSManagedObject *project;
+@property (nonatomic, retain) Project *project;
 
 @end
