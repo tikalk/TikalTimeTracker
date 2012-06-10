@@ -49,6 +49,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+<<<<<<< HEAD
 		950EC6651556A70B0055DE9B /* TimeTracker.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TimeTracker.xcdatamodel; sourceTree = "<group>"; };
 		950EC6671556AAE20055DE9B /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Event.h; path = Classes/Event.h; sourceTree = "<group>"; };
 		950EC6681556AAE20055DE9B /* Event.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Event.m; path = Classes/Event.m; sourceTree = "<group>"; };
@@ -60,6 +61,10 @@
 		9520B7691552FC5C0051FD0F /* Geofencing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Geofencing.m; path = Plugins/Geofencing.m; sourceTree = "<group>"; };
 		957F6BDD1557F49B008C43A8 /* NSDate+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSDate+Utils.h"; path = "Classes/NSDate+Utils.h"; sourceTree = "<group>"; };
 		957F6BDE1557F49B008C43A8 /* NSDate+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSDate+Utils.m"; path = "Classes/NSDate+Utils.m"; sourceTree = "<group>"; };
+=======
+		27D0CB8C1569292D00E7CC46 /* krypton.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = krypton.gpx; path = ../../../../Users/mike/Desktop/krypton.gpx; sourceTree = "<group>"; };
+		27D0CB8D1569292D00E7CC46 /* Tikal Offices.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "Tikal Offices.gpx"; path = "../../../../Users/mike/Desktop/Tikal Offices.gpx"; sourceTree = "<group>"; };
+>>>>>>> no changes
 		95CE84C8153C798300FBCFB2 /* TikalTimeTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TikalTimeTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		95CE84CC153C798300FBCFB2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		95CE84CE153C798300FBCFB2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -137,6 +142,8 @@
 		95CE84BA153C798300FBCFB2 = {
 			isa = PBXGroup;
 			children = (
+				27D0CB8C1569292D00E7CC46 /* krypton.gpx */,
+				27D0CB8D1569292D00E7CC46 /* Tikal Offices.gpx */,
 				95CE8524153C79CF00FBCFB2 /* www */,
 				95CE84E6153C798300FBCFB2 /* TikalTimeTracker */,
 				95CE84CB153C798300FBCFB2 /* Frameworks */,
