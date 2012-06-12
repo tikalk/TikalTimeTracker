@@ -78,7 +78,7 @@ public class WifiListener extends Plugin {
 	//remove a project from 
 	public static final String ACTION_REMOVE_PROJECT = "removeProject";
 	//send an email with all log reports
-	public static final String ACTION_EMAIL_REPORTS = "sendReportsForDate";
+	public static final String ACTION_EMAIL_REPORTS = "exportProjectsForDate";
 
 	//KEY CONSTANTS
 	public static final String KEY_PROJECT_ID = "fid";
