@@ -262,7 +262,7 @@
 			"year" : year,
 			"month" : month
 		};
-		DGPTimeTracker.sendReportsForDate(params, function(result) {
+		DGPTimeTracker.exportProjectsForDate(params, function(result) {
 			$.mobile.hidePageLoadingMsg();
 		}, function(error) {
 			$.mobile.hidePageLoadingMsg();

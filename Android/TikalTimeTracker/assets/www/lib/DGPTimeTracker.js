@@ -137,7 +137,7 @@ var DGPTimeTracker = {
   	#define KEY_MONTH                           @"month"
 
   	*/
-       sendReportsForDate: function(params, success, fail) {
-            return PhoneGap.exec(success, fail, "DGPTimeTracker", "sendReportsForDate", [params]);
+      exportProjectsForDate: function(params, success, fail) {
+            return PhoneGap.exec(success, fail, "DGPTimeTracker", "exportProjectsForDate", [params]);
        }
 };
