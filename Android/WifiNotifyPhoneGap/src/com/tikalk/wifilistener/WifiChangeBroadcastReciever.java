@@ -140,13 +140,13 @@ public class WifiChangeBroadcastReciever extends BroadcastReceiver {
 			String ns = Context.NOTIFICATION_SERVICE;
 			NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(ns);
 			int icon = R.drawable.ic_dialog_info;
-			CharSequence tickerText = "TimeTracker may not be working";
+			CharSequence tickerText = "Wifi location tracking functionality has been disabled";
 			long when = System.currentTimeMillis();
 
 			Notification notification = new Notification(icon, tickerText, when);
 
-			CharSequence contentTitle = "TimeTracker";
-			CharSequence contentText = "With Wifi turned off TimeTracker will not work!";
+			CharSequence contentTitle = "WifiNotify";
+			CharSequence contentText = "Wifi location tracking disabled";
 
 
 
