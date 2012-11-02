@@ -35,9 +35,9 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 	//constant for singleupdate intent filter
 	public static final String SINGLE_LOCATION_UPDATE_ACTION = "com.radioactiveyak.places.SINGLE_LOCATION_UPDATE_ACTION";
 	//constant for max distance from origional location to perform login
-	public static final float MAX_DIST = 500.0f;
+	public static final float MAX_DIST = 1500.0f;
 	//constant for min distance for a logout if user is less than that distance away won't perform logout
-	public static final float MIN_DIST = 300.0f;
+	public static final float MIN_DIST = 1300.0f;
 	//string for intent filter on phonegap app
 	public static final String INTENT_FILTER_STRING = "com.tikal.location.tracker";
 	//KEYS FOR BUNDLE
