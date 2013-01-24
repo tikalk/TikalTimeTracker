@@ -3,8 +3,6 @@ package com.tikalk.wifilistener;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tikalk.tools.DBTool;
-
 import android.app.ActivityManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -15,9 +13,6 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;

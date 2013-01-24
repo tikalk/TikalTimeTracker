@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.tikalk.tools.DBTool;
-import com.tikalk.tools.Defined;
 import com.tikalk.tools.PendingEvent;
 import com.tikalk.tools.Shared;
 

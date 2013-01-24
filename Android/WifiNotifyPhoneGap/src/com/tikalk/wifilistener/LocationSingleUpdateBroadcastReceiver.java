@@ -49,9 +49,17 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 	 * MEMBERS
 	 */
 	private DBTool mDB;
-
+	
+	/**
+	 * STATICS
+	 */
+	static PendingIntent singleUpatePI;
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		//for fixing bug in 1.4.2 remove updates when we receive an update
+		LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+		if(singleUpatePI != null)
+			locationManager.removeUpdates(singleUpatePI);
 		Shared.mRequestingLocation = false;;
 		Log.d("location test", "Location update fired");
 		//added bceause a previous call could have already unregistered the reciever
@@ -219,7 +227,7 @@ public class LocationSingleUpdateBroadcastReceiver extends BroadcastReceiver {
 		//create pending intent to fire
 		LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 		Intent updateIntent = new Intent(SINGLE_LOCATION_UPDATE_ACTION);  
-		PendingIntent singleUpatePI = PendingIntent.getBroadcast(context, 0, updateIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		singleUpatePI = PendingIntent.getBroadcast(context, 0, updateIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		Criteria criteria = new Criteria();
 		String majorProvider = locationManager.getBestProvider(criteria, true);
 		Log.d("location test", "major provider " + majorProvider);
